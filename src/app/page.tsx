@@ -5,6 +5,7 @@ export default function Home() {
     <main>
       hi!
       <Link href="/registration">Register here</Link>
+      <Link href={"/logout"}>Logout</Link>
     </main>
   );
 }
