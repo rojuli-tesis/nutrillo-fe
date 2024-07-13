@@ -69,18 +69,29 @@ export interface RoutineDetails {
 }
 
 export interface ExtraDetails {
-  sedentaryLevel: string;
+  sedentaryLevel: number;
   workouts: {
-    type: string;
+    name: string;
     frequency: string;
     duration: string;
-    startingYear: number;
+    startingYear: string;
     place: string;
   }[];
   alcohol: string;
+  alcoholDetails: string;
   smoking: string;
+  smokingDetails: string;
   supplements: string;
+  supplementsDetails: string;
   stepName: string;
+}
+
+export interface Workout {
+  name: string;
+  frequency: string;
+  duration: string;
+  startingYear: string;
+  place: string;
 }
 
 export enum RegistrationSteps {

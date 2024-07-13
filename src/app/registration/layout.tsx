@@ -25,10 +25,15 @@ const RegistrationLayout = ({ children }: { children: React.ReactNode }) => {
   const progress = Math.round((currentStep / totalSteps) * 100);
 
   const checkNextStepToComplete = async () => {
-    const userData = await restClient.get<{ lastStep: string }>(
-      "/registration",
-    );
+    const userData = await restClient.get<{
+      lastStep: string;
+      finished: boolean;
+    }>("/registration");
     if (userData) {
+      if (userData.finished) {
+        router.push("/");
+        return;
+      }
       const latestIndex = steps.findIndex((stp) => stp === userData.lastStep);
       router.push(`/registration/${steps[latestIndex + 1]}`);
       if (currentStep === latestIndex + 1) {
