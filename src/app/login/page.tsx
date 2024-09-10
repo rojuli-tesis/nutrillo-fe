@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import * as z from "zod";
 import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import CenteredBox from "@/app/components/positioning/CenteredBox";
@@ -22,7 +22,7 @@ interface LoginForm {
   password: string;
 }
 
-const Login = () => {
+const LoginComponent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const from = searchParams.get("from");
@@ -46,7 +46,9 @@ const Login = () => {
       .then((nextPath) => {
         router.push(nextPath);
       })
-      .catch(console.error);
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   return (
@@ -129,5 +131,11 @@ const Login = () => {
     </Box>
   );
 };
+
+const Login = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <LoginComponent />
+  </Suspense>
+);
 
 export default Login;

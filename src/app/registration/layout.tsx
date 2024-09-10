@@ -47,7 +47,7 @@ const RegistrationLayout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     checkNextStepToComplete();
-  }, [pathname]);
+  }, [pathname, checkNextStepToComplete]);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
