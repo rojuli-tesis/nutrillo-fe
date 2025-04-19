@@ -2,211 +2,137 @@
 
 import React from "react";
 import {
-  Box,
-  Button,
   Grid,
   InputLabel,
   MenuItem,
   Select,
   TextField,
-  Typography,
+  FormControl,
 } from "@mui/material";
-import { usePathname, useRouter } from "next/navigation";
-import {
-  ExtraDetails,
-  RoutineDetails,
-  steps,
-} from "@/utils/constants/registration";
-import CenteredBox from "@/app/components/positioning/CenteredBox";
+import { ExtraDetails } from "@/utils/constants/registration";
 import { Controller, useForm } from "react-hook-form";
-import restClient from "@/utils/restClient";
-import { FormControl } from "@mui/base";
-
-const StepName = "lifestyle";
+import RegistrationStep from "@/app/components/registration/RegistrationStep";
 
 const Lifestyle = () => {
-  const pathname = usePathname();
-  const router = useRouter();
-
-  const { handleSubmit, control, register } = useForm<Partial<ExtraDetails>>({
+  const form = useForm<ExtraDetails>({
     defaultValues: {
-      alcohol: "",
+      alcohol: 0,
       alcoholDetails: "",
-      smoking: "",
+      smoking: 0,
       smokingDetails: "",
-      supplements: "",
+      supplements: 0,
       supplementsDetails: "",
+      sedentaryLevel: 0,
+      workouts: [],
+      stepName: "lifestyle"
     },
   });
 
-  const saveAndClose = async (formData: Partial<ExtraDetails>) => {
-    try {
-      await restClient.post(`/registration/${StepName.replace("/", "-")}`, {
-        data: {
-          ...formData,
-          stepName: StepName,
-        },
-        saveAndClose: true,
-      });
-      router.push("/");
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleAbandon = async () => {
-    await restClient.patch("/registration/abandon");
-    router.push("/");
-  };
-
   return (
-    <div>
-      <CenteredBox sx={{ flexDirection: "column" }}>
-        <h2>Informacion Adicional</h2>
-        <Typography>Estilo de Vida</Typography>
-      </CenteredBox>
-      <Box
-        sx={{
-          padding: "16px 32px",
-        }}
-      >
-        <form onSubmit={handleSubmit(saveAndClose)}>
-          <Grid container rowGap={1}>
-            <Grid item xs={12}>
-              <FormControl>
-                <InputLabel id="alcohol">Bebe alcohol?</InputLabel>
-                <Controller
-                  control={control}
-                  render={({ field }) => {
-                    return (
-                      <Select
-                        labelId={"alcohol"}
-                        fullWidth
-                        displayEmpty
-                        {...field}
-                      >
-                        <MenuItem disabled value={""}>
-                          Selecciona una opcion
-                        </MenuItem>
-                        <MenuItem value={"no"}>No</MenuItem>
-                        <MenuItem value={"rarely"}>Raramente</MenuItem>
-                        <MenuItem value={"social"}>Socialmente</MenuItem>
-                        <MenuItem value={"frecuently"}>Frecuentemente</MenuItem>
-                      </Select>
-                    );
-                  }}
-                  name={"alcohol"}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label={"Detalles sobre consumo de alcohol"}
-                placeholder={"Describa frecuencia y cantidad"}
-                {...register("alcoholDetails")}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl>
-                <InputLabel id="smoking">Fuma?</InputLabel>
-                <Controller
-                  control={control}
-                  render={({ field }) => {
-                    return (
-                      <Select
-                        labelId={"smoking"}
-                        fullWidth
-                        displayEmpty
-                        {...field}
-                      >
-                        <MenuItem disabled value={""}>
-                          Selecciona una opcion
-                        </MenuItem>
-                        <MenuItem value={"no"}>No</MenuItem>
-                        <MenuItem value={"rarely"}>Raramente</MenuItem>
-                        <MenuItem value={"social"}>Socialmente</MenuItem>
-                        <MenuItem value={"frecuently"}>Frecuentemente</MenuItem>
-                      </Select>
-                    );
-                  }}
-                  name={"smoking"}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label={"Habitos de fumador"}
-                placeholder={"Describa frecuencia y cantidad"}
-                {...register("smokingDetails")}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl>
-                <InputLabel id="supplements">
-                  Utiliza suplementos dietarios?
-                </InputLabel>
-                <Controller
-                  control={control}
-                  render={({ field }) => {
-                    return (
-                      <Select
-                        labelId={"supplements"}
-                        fullWidth
-                        displayEmpty
-                        {...field}
-                      >
-                        <MenuItem disabled value={""}>
-                          Selecciona una opcion
-                        </MenuItem>
-                        <MenuItem value={"no"}>No</MenuItem>
-                        <MenuItem value={"rarely"}>Raramente</MenuItem>
-                        <MenuItem value={"frecuently"}>Frecuentemente</MenuItem>
-                      </Select>
-                    );
-                  }}
-                  name={"supplements"}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label={"Descripcion de suplementos"}
-                placeholder={
-                  "Indique cuales suplementos, momento de ingesta, etc."
-                }
-                {...register("supplementsDetails")}
-              />
-            </Grid>
-          </Grid>
-        </form>
-      </Box>
-      <Grid
-        container
-        gap={"6px"}
-        sx={{
-          padding: "16px 32px",
-        }}
-      >
+    <RegistrationStep
+      stepName="lifestyle"
+      title="Estilo de Vida"
+      subtitle="Por favor, completa la información sobre tus hábitos"
+      form={form}
+    >
+      <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Button
-            fullWidth
-            onClick={handleSubmit(saveAndClose)}
-            variant={"outlined"}
-            color={"secondary"}
-          >
-            Guardar y Finalizar
-          </Button>
+          <FormControl fullWidth>
+            <InputLabel id="alcohol-label">¿Bebe alcohol?</InputLabel>
+            <Controller
+              control={form.control}
+              render={({ field }) => (
+                <Select
+                  labelId="alcohol-label"
+                  id="alcohol"
+                  label="¿Bebe alcohol?"
+                  displayEmpty
+                  {...field}
+                >
+                  <MenuItem disabled value={0}>Selecciona una opción</MenuItem>
+                  <MenuItem value={1}>No</MenuItem>
+                  <MenuItem value={2}>Raramente</MenuItem>
+                  <MenuItem value={3}>Socialmente</MenuItem>
+                  <MenuItem value={4}>Frecuentemente</MenuItem>
+                </Select>
+              )}
+              name="alcohol"
+            />
+          </FormControl>
         </Grid>
         <Grid item xs={12}>
-          <Button fullWidth color={"error"} onClick={handleAbandon}>
-            Abandonar
-          </Button>
+          <TextField
+            fullWidth
+            label="Detalles sobre consumo de alcohol"
+            placeholder="Describa frecuencia y cantidad"
+            {...form.register("alcoholDetails")}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <FormControl fullWidth>
+            <InputLabel id="smoking-label">¿Fuma?</InputLabel>
+            <Controller
+              control={form.control}
+              render={({ field }) => (
+                <Select
+                  labelId="smoking-label"
+                  id="smoking"
+                  label="¿Fuma?"
+                  displayEmpty
+                  {...field}
+                >
+                  <MenuItem disabled value={0}>Selecciona una opción</MenuItem>
+                  <MenuItem value={1}>No</MenuItem>
+                  <MenuItem value={2}>Raramente</MenuItem>
+                  <MenuItem value={3}>Socialmente</MenuItem>
+                  <MenuItem value={4}>Frecuentemente</MenuItem>
+                </Select>
+              )}
+              name="smoking"
+            />
+          </FormControl>
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Hábitos de fumador"
+            placeholder="Describa frecuencia y cantidad"
+            {...form.register("smokingDetails")}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <FormControl fullWidth>
+            <InputLabel id="supplements-label">¿Utiliza suplementos dietarios?</InputLabel>
+            <Controller
+              control={form.control}
+              render={({ field }) => (
+                <Select
+                  labelId="supplements-label"
+                  id="supplements"
+                  label="¿Utiliza suplementos dietarios?"
+                  displayEmpty
+                  {...field}
+                >
+                  <MenuItem disabled value={0}>Selecciona una opción</MenuItem>
+                  <MenuItem value={1}>No</MenuItem>
+                  <MenuItem value={2}>Raramente</MenuItem>
+                  <MenuItem value={3}>Frecuentemente</MenuItem>
+                </Select>
+              )}
+              name="supplements"
+            />
+          </FormControl>
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Descripción de suplementos"
+            placeholder="Indique cuáles suplementos, momento de ingesta, etc."
+            {...form.register("supplementsDetails")}
+          />
         </Grid>
       </Grid>
-    </div>
+    </RegistrationStep>
   );
 };
 

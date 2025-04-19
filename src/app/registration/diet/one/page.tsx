@@ -32,7 +32,10 @@ const DietOne = () => {
             options={[
               { value: "water", label: "Agua" },
               { value: "coffee", label: "Café" },
+              { value: 'mate', label: 'Mate'},
               { value: "tea", label: "Té" },
+              { value: "juice", label: "Jugo" },
+              { value: "milk", label: "Leche" },
               { value: "soda", label: "Refrescos" },
             ]}
           />

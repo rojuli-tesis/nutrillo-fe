@@ -31,9 +31,9 @@ export interface PhysicalActivity {
 }
 
 export interface HealthStatus {
-  diagnosedIllness: string;
-  medication: string;
-  weightLossMeds: string;
+  diagnosedIllness: number;
+  medication: number;
+  weightLossMeds: number;
   stepName: string;
 }
 
@@ -78,11 +78,11 @@ export interface ExtraDetails {
     startingYear: string;
     place: string;
   }[];
-  alcohol: string;
+  alcohol: number;
   alcoholDetails: string;
-  smoking: string;
+  smoking: number;
   smokingDetails: string;
-  supplements: string;
+  supplements: number;
   supplementsDetails: string;
   stepName: string;
 }

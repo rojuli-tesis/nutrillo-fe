@@ -16,11 +16,11 @@ const WorkoutForm = ({
   ) => (evt: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   return (
-    <Box sx={{ marginBottom: "8px" }}>
+    <Box sx={{ marginBottom: "16px" }}>
       <Grid
         container
         sx={{
-          rowGap: "8px",
+          rowGap: "16px",
         }}
       >
         <Grid item xs={11}>
@@ -30,7 +30,7 @@ const WorkoutForm = ({
         </Grid>
         <Grid item xs={1}>
           {index > 0 && (
-            <IconButton color={"error"} onClick={onRemove}>
+            <IconButton color="error" onClick={onRemove}>
               <DeleteIcon />
             </IconButton>
           )}
@@ -38,40 +38,45 @@ const WorkoutForm = ({
         <Grid item xs={12}>
           <TextField
             fullWidth
-            size={"small"}
-            label={"Nombre"}
+            size="small"
+            label="Nombre"
+            placeholder="Ej: Natación, Running, etc."
             onChange={onFieldChange("name", index)}
           />
         </Grid>
         <Grid item xs={12}>
           <TextField
             fullWidth
-            size={"small"}
-            label={"Frecuencia"}
+            size="small"
+            label="Frecuencia"
+            placeholder="Ej: 2 veces por semana"
             onChange={onFieldChange("frequency", index)}
           />
         </Grid>
         <Grid item xs={12}>
           <TextField
             fullWidth
-            size={"small"}
-            label={"Duracion de la actividad"}
+            size="small"
+            label="Duración de la actividad"
+            placeholder="Ej: 1 hora"
             onChange={onFieldChange("duration", index)}
           />
         </Grid>
         <Grid item xs={12}>
           <TextField
             fullWidth
-            size={"small"}
-            label={"Año de inicio"}
+            size="small"
+            label="Año de inicio"
+            placeholder="Ej: 2020"
             onChange={onFieldChange("startingYear", index)}
           />
         </Grid>
         <Grid item xs={12}>
           <TextField
             fullWidth
-            size={"small"}
-            label={"Lugar"}
+            size="small"
+            label="Lugar"
+            placeholder="Ej: Gimnasio, Parque, etc."
             onChange={onFieldChange("place", index)}
           />
         </Grid>
@@ -79,4 +84,5 @@ const WorkoutForm = ({
     </Box>
   );
 };
+
 export default WorkoutForm;
