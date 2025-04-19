@@ -74,7 +74,7 @@ const InviteWithCodePage = ({
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     control,
   } = useForm<RegisterForm>({
     resolver: zodResolver(schema),
@@ -174,6 +174,9 @@ const InviteWithCodePage = ({
                     fullWidth
                     label={"Email"}
                     autoComplete={"email"}
+                    InputLabelProps={{
+                      shrink: (inviteData?.email || '').length > 0,
+                    }}
                   />
                 )}
               />
@@ -197,8 +200,8 @@ const InviteWithCodePage = ({
               />
             </Grid>
             <Grid item xs={12}>
-              <Button type={"submit"} variant={"contained"} fullWidth>
-                Crear cuenta
+              <Button type={"submit"} disabled={isSubmitting} variant={"contained"} fullWidth>
+                {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
               </Button>
             </Grid>
           </Grid>

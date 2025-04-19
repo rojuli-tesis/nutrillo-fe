@@ -1,140 +1,48 @@
 "use client";
 
 import React from "react";
-import { Box, Button, Grid, Typography } from "@mui/material";
-import { usePathname, useRouter } from "next/navigation";
-import { DietDetails, steps } from "@/utils/constants/registration";
-import CenteredBox from "@/app/components/positioning/CenteredBox";
+import { Grid, Typography } from "@mui/material";
+import { DietDetails } from "@/utils/constants/registration";
 import { useForm } from "react-hook-form";
-import restClient from "@/utils/restClient";
+import RegistrationStep from "@/app/components/registration/RegistrationStep";
 import MultiselectCheckbox from "@/app/components/forms/MultiselectCheckbox";
 
-const StepName = "diet/two";
-
 const DietTwo = () => {
-  const pathname = usePathname();
-  const router = useRouter();
-
-  const { handleSubmit, control } = useForm<Partial<DietDetails>>({
+  const form = useForm<Partial<DietDetails>>({
     defaultValues: {
       snacks: [],
+      stepName: "diet/two"
     },
   });
 
-  const handleAbandon = async () => {
-    await restClient.patch("/registration/abandon");
-    router.push("/");
-  };
-
-  const saveAndClose = async (formData: Partial<DietDetails>) => {
-    try {
-      await restClient.post(`/registration/${StepName.replace("/", "-")}`, {
-        data: {
-          ...formData,
-          stepName: StepName,
-        },
-        saveAndClose: true,
-      });
-      router.push("/");
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const goToNextStep = async (formData: Partial<DietDetails>) => {
-    try {
-      await restClient.post(`/registration/${StepName.replace("/", "-")}`, {
-        data: {
-          ...formData,
-          stepName: StepName,
-        },
-        saveAndClose: false,
-      });
-      const currentStep = steps.indexOf(pathname.replace("/registration/", ""));
-      router.push(`/registration/${steps[currentStep + 1]}`);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   return (
-    <div>
-      <CenteredBox sx={{ flexDirection: "column" }}>
-        <h2>Informacion Adicional</h2>
-        <Typography>Alimentacion Actual - Parte II</Typography>
-      </CenteredBox>
-      <Box
-        sx={{
-          padding: "16px 32px",
-        }}
-      >
-        <form onSubmit={handleSubmit(goToNextStep)}>
-          <Grid container rowGap={1}>
-            <Grid item xs={12}>
-              <Typography>Snacks - Consume:</Typography>
-              <Box sx={{ paddingLeft: "20px" }}>
-                <MultiselectCheckbox
-                  name={"snacks"}
-                  control={control}
-                  includeOthers
-                  options={[
-                    {
-                      label: "Papas fritas",
-                      value: "french-fries",
-                    },
-                    {
-                      label: "Pochoclos",
-                      value: "popcorn",
-                    },
-                    { label: "Frutos secos", value: "nuts" },
-                    { label: "Snacks de arroz", value: "rice-snacks" },
-                    { label: "Yoghurt", value: "yoghurt" },
-                    { label: "Fruta", value: "fruit" },
-                    {
-                      label: "Barritas de cereal",
-                      value: "cereal-bars",
-                    },
-                    { label: "Granola", value: "granola" },
-                  ]}
-                />
-              </Box>
-            </Grid>
-          </Grid>
-        </form>
-      </Box>
-      <Grid
-        container
-        gap={"6px"}
-        sx={{
-          padding: "16px 32px",
-        }}
-      >
+    <RegistrationStep
+      stepName="diet/two"
+      title="Dieta - Paso 2"
+      subtitle="Por favor, selecciona tus preferencias de snacks"
+      form={form}
+    >
+      <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Button
-            fullWidth
-            onClick={handleSubmit(goToNextStep)}
-            variant={"contained"}
-          >
-            Siguiente
-          </Button>
-        </Grid>
-        <Grid item xs={12}>
-          <Button
-            fullWidth
-            onClick={handleSubmit(saveAndClose)}
-            variant={"outlined"}
-            color={"secondary"}
-          >
-            Guardar y Finalizar
-          </Button>
-        </Grid>
-        <Grid item xs={12}>
-          <Button fullWidth color={"error"} onClick={handleAbandon}>
-            Abandonar
-          </Button>
+          <Typography>Snacks</Typography>
+          <MultiselectCheckbox
+            control={form.control}
+            name="snacks"
+            includeOthers
+            options={[
+              { value: "french-fries", label: "Papas fritas" },
+              { value: "popcorn", label: "Pochoclos" },
+              { value: "nuts", label: "Frutos secos" },
+              { value: "rice-snacks", label: "Snacks de arroz" },
+              { value: "yoghurt", label: "Yoghurt" },
+              { value: "fruit", label: "Fruta" },
+              { value: "cereal-bars", label: "Barritas de cereal" },
+              { value: "granola", label: "Granola" },
+            ]}
+          />
         </Grid>
       </Grid>
-    </div>
+    </RegistrationStep>
   );
 };
 

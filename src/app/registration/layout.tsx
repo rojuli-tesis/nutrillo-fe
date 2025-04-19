@@ -34,8 +34,18 @@ const RegistrationLayout = ({ children }: { children: React.ReactNode }) => {
         router.push("/");
         return;
       }
-      const latestIndex = steps.findIndex((stp) => stp === userData.lastStep);
-      router.push(`/registration/${steps[latestIndex + 1]}`);
+      
+      // Convert hyphenated step name from backend to slash format for frontend
+      const convertedStep = userData.lastStep.replace(/-/g, "/");
+      const latestIndex = steps.findIndex((stp) => stp === convertedStep);
+      
+      if (latestIndex >= 0 && latestIndex < steps.length - 1) {
+        router.push(`/registration/${steps[latestIndex + 1]}`);
+      } else {
+        // If we can't find the step or it's the last one, stay on current page
+        setIsLoading(false);
+      }
+      
       if (currentStep === latestIndex + 1) {
         setIsLoading(false);
       }

@@ -19,6 +19,7 @@ export interface PersonalData {
   lastName: string;
   dob: Date;
   objectives: string;
+  stepName?: string;
 }
 
 export interface PhysicalActivity {
@@ -48,23 +49,23 @@ export interface DietDetails {
 
 export interface RoutineDetails {
   mealsADay: number;
-  householdShopper: string;
-  starvingHours: string;
+  householdShopper: number;
+  starvingHours: number;
   preferredFoods: string;
   dislikedFoods: string;
-  breakfastTime: string;
+  breakfastTime: number;
   breakfastDetails: string;
-  midMorningSnackTime: string;
+  midMorningSnackTime: number;
   midMorningSnackDetails: string;
-  lunchTime: string;
+  lunchTime: number;
   lunchDetails: string;
-  afternoonSnackTime: string;
+  afternoonSnackTime: number;
   afternoonSnackDetails: string;
-  meriendaTime: string;
+  meriendaTime: number;
   meriendaDetails: string;
-  dinnerTime: string;
+  dinnerTime: number;
   dinnerDetails: string;
-  sleepTime: string;
+  sleepTime: number;
   stepName: string;
 }
 
