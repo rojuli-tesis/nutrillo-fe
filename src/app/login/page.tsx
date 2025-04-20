@@ -1,141 +1,153 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { useEffect } from "react";
 import * as z from "zod";
-import { Box, Button, Grid, TextField, Typography } from "@mui/material";
-import CenteredBox from "@/app/components/positioning/CenteredBox";
+import {
+  Box,
+  Button,
+  Container,
+  Grid,
+  TextField,
+  Typography,
+  Alert,
+  AlertTitle,
+  CircularProgress,
+} from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import restClient from "@/utils/restClient";
-import Logo from "@/common/logo";
+import { Snackbar } from "@mui/material";
 
-const schema = z
-  .object({
-    email: z.string().email(),
-    password: z.string(),
-  })
-  .required();
+const schema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
 
-interface LoginForm {
-  email: string;
-  password: string;
-}
+type LoginForm = z.infer<typeof schema>;
 
-const LoginComponent = () => {
+export default function LoginPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [showError, setShowError] = React.useState(false);
   const from = searchParams.get("from");
   const fromAccountCreation = from === "account-created";
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    control,
+    formState: { errors, isSubmitting },
   } = useForm<LoginForm>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      password: "1234.Abcdef",
-    },
   });
 
   const onSubmit = async (data: LoginForm) => {
-    restClient
-      .post("/auth/login", data)
-      .then((nextPath) => {
-        router.push(nextPath);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    try {
+      const nextPath = await restClient.post("/auth/login", data);
+      router.replace(nextPath);
+    } catch (error) {
+      setShowError(true);
+    }
   };
+
+  // Check if already authenticated
+  useEffect(() => {
+    restClient.get("/auth/me")
+      .then(() => {
+        router.replace("/home");
+      })
+      .catch(() => {
+        // Not authenticated, stay on login page
+      });
+  }, [router]);
 
   return (
     <Box
       sx={{
-        padding: "0 20px",
+        minHeight: "100vh",
+        bgcolor: "grey.50",
+        py: 4,
+        px: 2,
       }}
     >
-      <CenteredBox
-        sx={{
-          marginTop: "100px",
-          padding: "20px 20px 20px 0px",
-        }}
-      >
-        <Logo />
-      </CenteredBox>
-      {fromAccountCreation && (
-        <Box
-          sx={{
-            backgroundColor: "success.light",
-            padding: "12px 20px",
-            borderRadius: "16px",
-            fontSize: "14px",
-            margin: "12px 0 50px 0",
-          }}
-        >
-          <Typography
-            sx={{
-              color: "success.main",
-              fontWeight: "bold",
-              fontSize: "20px",
-            }}
-          >
-            Cuenta creada
-          </Typography>
-          <Typography>
-            Tu cuenta ha sido creada exitosamente! Para ingresar,{" "}
-            <b>verifica tu email.</b> Puede que el correo de verificacion haya
-            sido enviado a tu casilla de spam.
-          </Typography>
-        </Box>
-      )}
-      <CenteredBox>
-        <form
-          style={{ width: "100%", padding: "10px 36px" }}
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <Grid container spacing={{ xs: 2 }}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label={"Email"}
-                type="email"
-                autoComplete={"email"}
-                {...register("email")}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label={"Contraseña"}
-                type="password"
-                autoComplete={"password"}
-                {...register("password")}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Button
-                fullWidth
-                variant="contained"
-                type="submit"
-                sx={{ marginTop: "20px" }}
-              >
-                Ingresar
-              </Button>
-            </Grid>
+      <Container maxWidth="sm">
+        <Grid container direction="column" spacing={4}>
+          <Grid item>
+            <Typography variant="h4" color="primary" align="center" gutterBottom>
+              Welcome Back
+            </Typography>
           </Grid>
-        </form>
-      </CenteredBox>
+
+          {fromAccountCreation && (
+            <Grid item>
+              <Alert severity="success">
+                <AlertTitle>Account created successfully!</AlertTitle>
+                Please verify your email before logging in. Check your spam folder if you haven't received the verification email.
+              </Alert>
+            </Grid>
+          )}
+
+          <Grid item>
+            <Box
+              component="form"
+              onSubmit={handleSubmit(onSubmit)}
+              sx={{
+                width: "100%",
+                maxWidth: "400px",
+                mx: "auto",
+                p: 3,
+                borderRadius: 2,
+                bgcolor: "background.paper",
+                boxShadow: 1,
+              }}
+            >
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    type="email"
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
+                    {...register("email")}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Password"
+                    type="password"
+                    error={!!errors.password}
+                    helperText={errors.password?.message}
+                    {...register("password")}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    disabled={isSubmitting}
+                    sx={{ mt: 2 }}
+                  >
+                    {isSubmitting ? <CircularProgress size={24} /> : "Sign In"}
+                  </Button>
+                </Grid>
+              </Grid>
+            </Box>
+          </Grid>
+        </Grid>
+      </Container>
+
+      <Snackbar
+        open={showError}
+        autoHideDuration={3000}
+        onClose={() => setShowError(false)}
+        message="Invalid email or password"
+      />
     </Box>
   );
-};
-
-const Login = () => (
-  <Suspense fallback={<div>Loading...</div>}>
-    <LoginComponent />
-  </Suspense>
-);
-
-export default Login;
+}
