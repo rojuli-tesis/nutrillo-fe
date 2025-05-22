@@ -35,10 +35,9 @@ const theme = createTheme({
   components: {
     MuiButton: {
       styleOverrides: {
-        // root: {
-        //   textTransform: "none",
-        //   letterSpacing: "2px",
-        // },
+        root: {
+          textTransform: "none",
+        },
       },
     },
   },

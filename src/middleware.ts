@@ -1,6 +1,6 @@
-import { isBefore } from "date-fns";
 import { jwtDecode } from "jwt-decode";
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 function redirect(request: NextRequest, newDest: string) {
   const isLogin = request.nextUrl.pathname.startsWith("/login");
@@ -33,8 +33,15 @@ export function middleware(request: NextRequest) {
   if (!token) {
     return redirect(request, "/login");
   }
-  const decoded = jwtDecode(token);
-  if (decoded.exp && isBefore(new Date(decoded.exp * 1000), Date.now())) {
+  try {
+    const decoded = jwtDecode(token) as { exp: number };
+    const expirationDate = new Date(decoded.exp * 1000);
+    const isExpired = expirationDate < new Date();
+
+    if (isExpired) {
+      return redirect(request, "/login");
+    }
+  } catch (error) {
     return redirect(request, "/login");
   }
   if (isLogin) {

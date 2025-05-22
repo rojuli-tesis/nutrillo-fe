@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Grid,
@@ -12,6 +12,7 @@ import {
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
+import HistoryIcon from '@mui/icons-material/History';
 import { useRouter } from 'next/navigation';
 import MainLayout from '../components/MainLayout';
 import { getTimeBasedGreeting } from './helpers';
@@ -24,21 +25,28 @@ const QUICK_ACCESS_ITEMS = [
     description: 'Registra tus comidas diarias',
     icon: <RestaurantIcon />,
     path: '/meal-log',
-    colorKey: 'primary'
+    color: 'primary'
   },
   {
     title: 'Planes de nutrición',
     description: 'Ver planes',
     icon: <AssignmentIcon />,
     path: '/plans',
-    colorKey: 'secondary'
+    color: 'secondary'
   },
   {
     title: 'Construye tu plato',
     description: 'Crea platos balanceados',
     icon: <LocalDiningIcon />,
     path: '/plate-builder',
-    colorKey: 'success'
+    color: 'success'
+  },
+  {
+    title: 'Historial de comidas',
+    description: 'Ver tu historial de comidas',
+    icon: <HistoryIcon />,
+    path: '/meal-log-list',
+    color: 'info'
   }
 ] as const;
 
@@ -47,41 +55,27 @@ const HomePageContent = () => {
   const theme = useTheme();
   const { getPatientName } = useUser();
   const patientName = getPatientName();
+  const [greeting, setGreeting] = useState('');
+
+  useEffect(() => {
+    setGreeting(getTimeBasedGreeting(patientName));
+  }, [patientName]);
 
   return (
     <MainLayout>
-      <Container maxWidth="md" sx={{ px: { xs: 2, sm: 4 } }}>
-        <Typography 
-          variant="h4" 
-          gutterBottom 
-          sx={{ 
-            mb: 4,
-            fontWeight: 'bold',
-            background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            fontSize: { xs: '1.75rem', sm: '2.125rem' }
-          }}
-        >
-          {getTimeBasedGreeting(patientName)}
+      <Container maxWidth="lg" sx={{ py: 4, px: 6 }}>
+        <Typography variant="h4" gutterBottom>
+          {greeting}
         </Typography>
-
-        <Grid 
-          container 
-          spacing={{ xs: 2, sm: 3 }}
-          sx={{ 
-            maxWidth: 'min(100%, 600px)',
-            mx: 'auto'
-          }}
-        >
-          {QUICK_ACCESS_ITEMS.map((item, index) => (
-            <Grid item xs={6} key={index}>
+        <Grid container spacing={3} sx={{ mt: 2 }}>
+          {QUICK_ACCESS_ITEMS.map((item) => (
+            <Grid item xs={6} sm={6} md={4} key={item.path}>
               <QuickAccessCard
                 title={item.title}
                 description={item.description}
                 icon={item.icon}
-                color={theme.palette[item.colorKey].main}
                 onClick={() => router.push(item.path)}
+                color={theme.palette[item.color].main}
               />
             </Grid>
           ))}
@@ -93,12 +87,12 @@ const HomePageContent = () => {
           mt: 6 
         }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            Recent Activity
+            Actividad reciente
           </Typography>
           <Card sx={{ borderRadius: { xs: 2, sm: 3 } }}>
             <Box sx={{ p: 3 }}>
               <Typography color="text.secondary">
-                No recent activity to show
+                No hay actividad reciente para mostrar
               </Typography>
             </Box>
           </Card>

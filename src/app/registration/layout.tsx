@@ -5,8 +5,6 @@ import CenteredBox from "@/app/components/positioning/CenteredBox";
 import { usePathname, useRouter } from "next/navigation";
 import { Box, CircularProgress, LinearProgress, styled } from "@mui/material";
 import { steps } from "@/utils/constants/registration";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
-import { LocalizationProvider } from "@mui/x-date-pickers";
 import restClient from "@/utils/restClient";
 import Logo from "@/common/logo";
 
@@ -60,7 +58,6 @@ const RegistrationLayout = ({ children }: { children: React.ReactNode }) => {
   }, [pathname, checkNextStepToComplete]);
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box>
         <Box sx={{ position: "relative" }}>
           <BorderLinearProgress value={progress} variant={"determinate"} />
@@ -89,7 +86,6 @@ const RegistrationLayout = ({ children }: { children: React.ReactNode }) => {
           children
         )}
       </Box>
-    </LocalizationProvider>
   );
 };
 

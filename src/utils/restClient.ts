@@ -4,12 +4,17 @@ const baseURL = process.env.NEXT_PUBLIC_API_URL;
 
 const instance = axios.create({
   baseURL,
-  headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
 
 const post = async (url: string, data?: any) => {
-  const response = await instance.post(url, data);
+  const config = {
+    headers: data instanceof FormData
+      ? { 'Content-Type': 'multipart/form-data' }
+      : { 'Content-Type': 'application/json' }
+  };
+  
+  const response = await instance.post(url, data, config);
   return response.data;
 };
 

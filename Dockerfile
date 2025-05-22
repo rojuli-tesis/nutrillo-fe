@@ -7,8 +7,10 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
-# Install dependencies using npm
-RUN npm install
+# Clear npm cache and install dependencies
+RUN npm cache clean --force && \
+    npm install --legacy-peer-deps && \
+    npm install dayjs@1.11.10 --save
 
 # Copy the rest of the application code
 COPY . .

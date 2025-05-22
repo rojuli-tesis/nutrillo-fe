@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Lato } from "next/font/google";
 import { ReactNode } from "react";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
-import { ThemeProvider } from "@mui/material/styles";
-import theme from "./theme";
+import { ClientProviders } from "./providers";
 
 const inter = Lato({ subsets: ["latin-ext"], weight: ["400", "700"] });
 
@@ -25,9 +23,7 @@ export default function RootLayout({
           margin: 0,
         }}
       >
-        <AppRouterCacheProvider>
-          <ThemeProvider theme={theme}>{children}</ThemeProvider>
-        </AppRouterCacheProvider>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );
