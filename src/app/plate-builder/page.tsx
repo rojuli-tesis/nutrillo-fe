@@ -24,7 +24,9 @@ export default function PlateBuilderPage() {
           Construye tu Plato
         </Typography>
         <Typography variant="subtitle1" align="center" color="text.secondary" paragraph>
-          Construye tu plato perfecto arrastrando y soltando ingredientes en el plato
+          Construye tu plato perfecto arrastrando y soltando ingredientes en el plato.
+          <br />
+          Al menos 3 ingredientes son requeridos para evaluar el plato.
         </Typography>
         <PlateBuilder plateIngredients={plateIngredients} />
       </Box>

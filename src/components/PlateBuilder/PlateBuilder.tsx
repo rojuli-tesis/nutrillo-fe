@@ -11,11 +11,40 @@ import {
   useDndMonitor,
   DragOverEvent
 } from '@dnd-kit/core';
-import { Box, Paper, Typography, styled, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { 
+  Box, 
+  Paper, 
+  Typography, 
+  styled, 
+  FormControl, 
+  InputLabel, 
+  Select, 
+  MenuItem,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+  Alert,
+  AlertTitle,
+  Chip,
+  Stack
+} from '@mui/material';
+import { useRouter } from 'next/navigation';
 import DraggableIngredient from './DraggableIngredient';
 import { PlateIngredient } from '@/types/plate-ingredient';
 import { describeArc, polarToCartesian } from '@/utils/plateUtils';
 import { getUniqueTypes, getFilteredSubtypes, filterIngredients } from './helper';
+import restClient from '@/utils/restClient';
+import GaugeChart from '../GaugeChart';
+
+interface PlateEvaluation {
+  score: number;
+  positives: string[];
+  issues: string[];
+  suggestions: string;
+}
 
 // Styled components
 const PlateContainer = styled(Box)(({ theme }) => ({
@@ -190,6 +219,12 @@ const PlateBuilder: React.FC<{
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedSubtype, setSelectedSubtype] = useState<string>('all');
+  const [evaluationModalOpen, setEvaluationModalOpen] = useState(false);
+  const [evaluationLoading, setEvaluationLoading] = useState(false);
+  const [evaluationResult, setEvaluationResult] = useState<PlateEvaluation | null>(null);
+  const [evaluationError, setEvaluationError] = useState<string>('');
+  
+  const router = useRouter();
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -231,8 +266,44 @@ const PlateBuilder: React.FC<{
     setSelectedIngredients(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleEvaluatePlate = async () => {
+    setEvaluationModalOpen(true);
+    setEvaluationLoading(true);
+    setEvaluationError('');
+    setEvaluationResult(null);
+
+    try {
+      // Real API call to plate evaluator endpoint
+      const response = await restClient.post('/plate-evaluator/evaluate', {
+        ingredients: selectedIngredients.map(ing => ({
+          name: ing.name,
+          type: ing.type.name,
+          subtype: ing.subtype?.name
+        }))
+      });
+      
+      setEvaluationResult(response);
+    } catch (error) {
+      console.error('Error evaluating plate:', error);
+      setEvaluationError('Error al evaluar el plato. Por favor, intenta de nuevo.');
+    } finally {
+      setEvaluationLoading(false);
+    }
+  };
+
+  const handleTryAgain = () => {
+    setEvaluationModalOpen(false);
+    setEvaluationResult(null);
+    setEvaluationError('');
+  };
+
+  const handleAccept = () => {
+    setEvaluationModalOpen(false);
+    router.push('/home');
+  };
+
   return (
-    <Box sx={{ p: 3 }}>
+    <Box >
       <DndContext 
         sensors={sensors} 
         onDragStart={handleDragStart}
@@ -243,6 +314,31 @@ const PlateBuilder: React.FC<{
           plateIngredients={selectedIngredients}
           onRemoveIngredient={handleRemoveIngredient}
         />
+
+        {/* Evaluation Button */}
+        {selectedIngredients.length >= 3 && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              onClick={handleEvaluatePlate}
+              sx={{
+                px: 4,
+                py: 1.5,
+                fontSize: '1.1rem',
+                fontWeight: 600,
+                borderRadius: 2,
+                boxShadow: 2,
+                '&:hover': {
+                  boxShadow: 4,
+                }
+              }}
+            >
+              Evaluar Plato
+            </Button>
+          </Box>
+        )}
 
         {/* Filters */}
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mb: 3 }}>
@@ -341,6 +437,153 @@ const PlateBuilder: React.FC<{
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      {/* Evaluation Modal */}
+      <Dialog
+        open={evaluationModalOpen}
+        onClose={() => !evaluationLoading && setEvaluationModalOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            maxHeight: '80vh'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          pb: 1, 
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2
+        }}>
+          <Typography variant="h5" component="span">
+            Evaluación del Plato
+          </Typography>
+          {evaluationLoading && <CircularProgress size={24} />}
+        </DialogTitle>
+        
+        <DialogContent sx={{ pt: 3 }}>
+          {evaluationLoading && (
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              py: 4,
+              gap: 2
+            }}>
+              <CircularProgress size={60} />
+              <Typography variant="h6" color="text.secondary">
+                Analizando tu plato...
+              </Typography>
+              <Typography variant="body2" color="text.secondary" align="center">
+                Nuestro sistema está evaluando la combinación de ingredientes
+              </Typography>
+            </Box>
+          )}
+          
+          {evaluationError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              <AlertTitle>Error</AlertTitle>
+              {evaluationError}
+            </Alert>
+          )}
+          
+          {evaluationResult && (
+            <Box sx={{ 
+              backgroundColor: 'grey.50', 
+              p: 3, 
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'divider'
+            }}>
+              {/* Score */}
+              <Box sx={{ textAlign: 'center', mb: 3 }}>
+                <GaugeChart value={evaluationResult.score} />
+              </Box>
+
+              {/* Positives */}
+              {evaluationResult.positives.length > 0 && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" color="success.main" gutterBottom>
+                    ✅ Aspectos Positivos
+                  </Typography>
+                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                    {evaluationResult.positives.map((positive, index) => (
+                      <Chip 
+                        key={index} 
+                        label={positive} 
+                        color="success" 
+                        variant="outlined" 
+                        size="small"
+                      />
+                    ))}
+                  </Stack>
+                </Box>
+              )}
+
+              {/* Issues */}
+              {evaluationResult.issues.length > 0 && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" color="warning.main" gutterBottom>
+                    ⚠️ Aspectos a Mejorar
+                  </Typography>
+                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                    {evaluationResult.issues.map((issue, index) => (
+                      <Chip 
+                        key={index} 
+                        label={issue} 
+                        color="warning" 
+                        variant="outlined" 
+                        size="small"
+                      />
+                    ))}
+                  </Stack>
+                </Box>
+              )}
+
+              {/* Suggestions */}
+              {evaluationResult.suggestions && (
+                <Box>
+                  <Typography variant="h6" color="info.main" gutterBottom>
+                    💡 Sugerencias
+                  </Typography>
+                  <Typography variant="body1" sx={{ lineHeight: 1.6 }}>
+                    {evaluationResult.suggestions}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        
+        <DialogActions sx={{ 
+          px: 3, 
+          py: 2, 
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          gap: 1
+        }}>
+          <Button 
+            onClick={handleTryAgain}
+            disabled={evaluationLoading}
+            variant="outlined"
+            sx={{ minWidth: 100 }}
+          >
+            Intentar de Nuevo
+          </Button>
+          <Button 
+            onClick={handleAccept}
+            disabled={evaluationLoading}
+            variant="contained"
+            sx={{ minWidth: 100 }}
+          >
+            Aceptar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
