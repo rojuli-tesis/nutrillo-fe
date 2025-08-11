@@ -16,7 +16,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { PhysicalActivity, steps } from "@/utils/constants/registration";
 import CenteredBox from "@/app/components/positioning/CenteredBox";
 import { Controller, useForm } from "react-hook-form";
-import { FormControl } from "@mui/base";
+import { FormControl } from "@mui/material";
 import restClient from "@/utils/restClient";
 
 const StepName = "currentStatus";

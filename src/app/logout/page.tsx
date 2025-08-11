@@ -1,8 +1,8 @@
-import { Spinner } from "@chakra-ui/react";
+import { CircularProgress } from "@mui/material";
 import React from "react";
 
 const LogoutPage = () => {
-  return <Spinner />;
+  return <CircularProgress />;
 };
 
 export default LogoutPage;

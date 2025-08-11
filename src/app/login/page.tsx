@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import * as z from "zod";
 import {
   Box,
@@ -26,7 +26,7 @@ const schema = z.object({
 
 type LoginForm = z.infer<typeof schema>;
 
-export default function LoginPage() {
+function LoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [showError, setShowError] = React.useState(false);
@@ -40,7 +40,7 @@ export default function LoginPage() {
   } = useForm<LoginForm>({
     resolver: zodResolver(schema),
     defaultValues: {
-      email: "julietarey.lp+juanperez@gmail.com",
+      email: "julietarey.lp+juanperez1@gmail.com",
       password: "Contrasenia1!",
     },
   });
@@ -86,7 +86,7 @@ export default function LoginPage() {
             <Grid item>
               <Alert severity="success">
                 <AlertTitle>Account created successfully!</AlertTitle>
-                Please verify your email before logging in. Check your spam folder if you haven't received the verification email.
+                Please verify your email before logging in. Check your spam folder if you haven&apos;t received the verification email.
               </Alert>
             </Grid>
           )}
@@ -153,5 +153,13 @@ export default function LoginPage() {
         message="Invalid email or password"
       />
     </Box>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

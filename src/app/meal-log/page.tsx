@@ -1,13 +1,14 @@
 "use client";
 
 import React from 'react';
-import { Button, Container, Stack, Typography } from '@mui/material';
+import { Button, Container, Stack, Typography, Box } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import MainLayout from '../components/MainLayout';
 import { MealLogForm } from './components/MealLogForm';
 import { getSuggestedMealType } from '@/types/meals';
 import restClient from '@/utils/restClient';
 import ArrowBack from '@mui/icons-material/ArrowBack';
+import StreakDisplay from '@/components/StreakDisplay';
 const MealLogPage = () => {
   const router = useRouter();
   const currentHour = new Date().getHours();
@@ -36,6 +37,14 @@ const MealLogPage = () => {
             Registrar comida
           </Typography>
         </Stack>
+
+        {/* Streak Display */}
+        <Box sx={{ mb: 3 }}>
+          <StreakDisplay 
+            streakType="mealLogging" 
+            title="Racha de registro de comidas" 
+          />
+        </Box>
 
         <MealLogForm
           initialTime={currentHour}

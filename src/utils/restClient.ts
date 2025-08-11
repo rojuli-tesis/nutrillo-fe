@@ -18,7 +18,7 @@ const post = async (url: string, data?: any) => {
   return response.data;
 };
 
-const put = async (url: string, data: any) => {
+const put = async (url: string, data?: any) => {
   const response = await instance.put(url, data);
   return response.data;
 };

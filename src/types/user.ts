@@ -4,6 +4,7 @@ export interface User {
   lastName: string;
   email: string;
   isActive: boolean;
+  points?: number;
 }
 
 export interface UserState {

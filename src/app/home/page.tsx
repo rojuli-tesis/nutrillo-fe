@@ -18,6 +18,9 @@ import MainLayout from '../components/MainLayout';
 import { getTimeBasedGreeting } from './helpers';
 import { useUser, UserProvider } from '@/contexts/UserContext';
 import { QuickAccessCard } from '../components/QuickAccessCard';
+import WeeklyActivity from '@/components/WeeklyActivity';
+import PointsHistory from '@/components/PointsHistory';
+import { pointsService, PointsStatus, PointTransaction } from '@/services/pointsService';
 
 const QUICK_ACCESS_ITEMS = [
   {
@@ -56,10 +59,33 @@ const HomePageContent = () => {
   const { getPatientName } = useUser();
   const patientName = getPatientName();
   const [greeting, setGreeting] = useState('');
+  const [pointsHistory, setPointsHistory] = useState<PointTransaction[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
     setGreeting(getTimeBasedGreeting(patientName));
   }, [patientName]);
+
+  useEffect(() => {
+    const fetchPointsHistory = async () => {
+      try {
+        setDataLoading(true);
+        setHistoryLoading(true);
+        
+        const history = await pointsService.getPointsHistory(5); // Get last 5 transactions
+        setPointsHistory(history.transactions);
+      } catch (error) {
+        console.error('Error fetching points history:', error);
+        // Don't show error to user, just don't display history
+      } finally {
+        setDataLoading(false);
+        setHistoryLoading(false);
+      }
+    };
+
+    fetchPointsHistory();
+  }, []);
 
   return (
     <MainLayout>
@@ -67,6 +93,12 @@ const HomePageContent = () => {
         <Typography variant="h4" gutterBottom>
           {greeting}
         </Typography>
+        
+        {/* Weekly Activity */}
+        <WeeklyActivity 
+          loading={dataLoading} 
+        />
+        
         <Grid container spacing={3} sx={{ mt: 2 }}>
           {QUICK_ACCESS_ITEMS.map((item) => (
             <Grid item xs={6} sm={6} md={4} key={item.path}>
@@ -86,16 +118,10 @@ const HomePageContent = () => {
           mx: 'auto',
           mt: 6 
         }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Actividad reciente
-          </Typography>
-          <Card sx={{ borderRadius: { xs: 2, sm: 3 } }}>
-            <Box sx={{ p: 3 }}>
-              <Typography color="text.secondary">
-                No hay actividad reciente para mostrar
-              </Typography>
-            </Box>
-          </Card>
+          <PointsHistory 
+            transactions={pointsHistory} 
+            loading={historyLoading} 
+          />
         </Box>
       </Container>
     </MainLayout>

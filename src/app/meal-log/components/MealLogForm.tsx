@@ -124,10 +124,11 @@ export const MealLogForm: React.FC<MealLogFormProps> = ({
       setIsSubmitting(true);
       setError(null);
 
+      // Combine date and time into a single datetime
+      const combinedDateTime = date.hour(time).minute(0).second(0).millisecond(0);
+
       const formData = new FormData();
-      formData.append('date', date.toISOString());
-      // TOOD: hour is not being applied to the date - need to fix
-      formData.append('time', time.toString());
+      formData.append('date', combinedDateTime.toISOString());
       formData.append('mealType', mealType);
       formData.append('description', description);
       if (photo) {

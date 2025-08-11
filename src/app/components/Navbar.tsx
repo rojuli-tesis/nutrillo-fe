@@ -17,7 +17,10 @@ import MenuIcon from '@mui/icons-material/Menu';
 import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
+import StarIcon from '@mui/icons-material/Star';
+import HistoryIcon from '@mui/icons-material/History';
 import { useRouter } from 'next/navigation';
+import PointsBadge from '@/components/PointsBadge';
 
 const Navbar = () => {
   const router = useRouter();
@@ -38,6 +41,14 @@ const Navbar = () => {
 
   const handleSettings = () => {
     router.push('/settings');
+  };
+
+  const handleFavorites = () => {
+    router.push('/favorites');
+  };
+
+  const handleActivityHistory = () => {
+    router.push('/activity-history');
   };
 
   return (
@@ -65,6 +76,9 @@ const Navbar = () => {
             >
               Nutrillo
             </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <PointsBadge />
           </Box>
         </Toolbar>
       </AppBar>
@@ -97,6 +111,18 @@ const Navbar = () => {
                 <SettingsIcon />
               </ListItemIcon>
               <ListItemText primary="Configuración" />
+            </ListItemButton>
+            <ListItemButton onClick={handleFavorites}>
+              <ListItemIcon>
+                <StarIcon />
+              </ListItemIcon>
+              <ListItemText primary="Favoritos" />
+            </ListItemButton>
+            <ListItemButton onClick={handleActivityHistory}>
+              <ListItemIcon>
+                <HistoryIcon />
+              </ListItemIcon>
+              <ListItemText primary="Historial de Actividad" />
             </ListItemButton>
             <ListItemButton onClick={handleLogout}>
               <ListItemIcon>
