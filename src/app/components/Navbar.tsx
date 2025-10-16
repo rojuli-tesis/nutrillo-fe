@@ -19,6 +19,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import StarIcon from '@mui/icons-material/Star';
 import HistoryIcon from '@mui/icons-material/History';
+import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 import { useRouter } from 'next/navigation';
 import PointsBadge from '@/components/PointsBadge';
 
@@ -49,6 +50,10 @@ const Navbar = () => {
 
   const handleActivityHistory = () => {
     router.push('/activity-history');
+  };
+
+  const handleMyRecipes = () => {
+    router.push('/my-recipes');
   };
 
   return (
@@ -117,6 +122,12 @@ const Navbar = () => {
                 <StarIcon />
               </ListItemIcon>
               <ListItemText primary="Favoritos" />
+            </ListItemButton>
+            <ListItemButton onClick={handleMyRecipes}>
+              <ListItemIcon>
+                <RestaurantMenuIcon />
+              </ListItemIcon>
+              <ListItemText primary="Mis Recetas" />
             </ListItemButton>
             <ListItemButton onClick={handleActivityHistory}>
               <ListItemIcon>

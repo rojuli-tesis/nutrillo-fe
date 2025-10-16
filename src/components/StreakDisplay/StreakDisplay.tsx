@@ -57,6 +57,11 @@ const StreakDisplay: React.FC<StreakDisplayProps> = ({ streakType, title }) => {
   const streak = pointsStatus.streaks[streakType];
   const multiplier = calculateStreakMultiplier(streak.currentStreak);
 
+  // Only show streak when it's more than 1 day
+  if (streak.currentStreak <= 1) {
+    return null;
+  }
+
   return (
     <Box sx={{ 
       display: 'flex', 

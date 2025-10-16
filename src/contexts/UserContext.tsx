@@ -82,6 +82,19 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkAuth();
   }, []);
 
+  // Listen for 401 unauthorized events from the axios interceptor
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      dispatch({ type: 'CLEAR_USER' });
+    };
+
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    
+    return () => {
+      window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    };
+  }, []);
+
   const getPatientName = () => {
     return state.user?.firstName || '';
   };

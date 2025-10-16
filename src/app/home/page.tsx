@@ -8,11 +8,14 @@ import {
   Card,
   Box,
   useTheme,
+  Button,
+  Stack,
 } from '@mui/material';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
 import HistoryIcon from '@mui/icons-material/History';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import { useRouter } from 'next/navigation';
 import MainLayout from '../components/MainLayout';
 import { getTimeBasedGreeting } from './helpers';
@@ -24,25 +27,25 @@ import { pointsService, PointsStatus, PointTransaction } from '@/services/points
 
 const QUICK_ACCESS_ITEMS = [
   {
-    title: 'Registrar comida',
-    description: 'Registra tus comidas diarias',
-    icon: <RestaurantIcon />,
-    path: '/meal-log',
-    color: 'primary'
-  },
-  {
-    title: 'Planes de nutrición',
-    description: 'Ver planes',
-    icon: <AssignmentIcon />,
-    path: '/plans',
-    color: 'secondary'
-  },
-  {
     title: 'Construye tu plato',
     description: 'Crea platos balanceados',
     icon: <LocalDiningIcon />,
     path: '/plate-builder',
     color: 'success'
+  },
+  {
+    title: 'Recetas favoritas',
+    description: 'Ver tus recetas guardadas',
+    icon: <FavoriteIcon />,
+    path: '/my-recipes',
+    color: 'secondary'
+  },
+  {
+    title: 'Registrar comida',
+    description: 'Registra tus comidas diarias',
+    icon: <RestaurantIcon />,
+    path: '/meal-log',
+    color: 'primary'
   },
   {
     title: 'Historial de comidas',
@@ -89,7 +92,7 @@ const HomePageContent = () => {
 
   return (
     <MainLayout>
-      <Container maxWidth="lg" sx={{ py: 4, px: 6 }}>
+      <Container maxWidth="lg" sx={{ py: 2, px: 6 }}>
         <Typography variant="h4" gutterBottom>
           {greeting}
         </Typography>
@@ -99,7 +102,7 @@ const HomePageContent = () => {
           loading={dataLoading} 
         />
         
-        <Grid container spacing={3} sx={{ mt: 2 }}>
+        <Grid container spacing={3} >
           {QUICK_ACCESS_ITEMS.map((item) => (
             <Grid item xs={6} sm={6} md={4} key={item.path}>
               <QuickAccessCard
@@ -112,6 +115,52 @@ const HomePageContent = () => {
             </Grid>
           ))}
         </Grid>
+
+        {/* Less prominent rectangular links */}
+        <Box sx={{ mt: 4, mb: 2 }}>
+          <Stack direction="column" spacing={1.5} sx={{ maxWidth: 400, mx: 'auto' }}>
+            <Button
+              variant="outlined"
+              startIcon={<AssignmentIcon />}
+              onClick={() => router.push('/plans')}
+              fullWidth
+              sx={{
+                borderRadius: 2,
+                py: 1,
+                textTransform: 'none',
+                fontSize: '0.9rem',
+                borderColor: theme.palette.secondary.main,
+                color: theme.palette.secondary.main,
+                '&:hover': {
+                  borderColor: theme.palette.secondary.dark,
+                  backgroundColor: theme.palette.secondary.light + '20',
+                }
+              }}
+            >
+              Planes de nutrición
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<FavoriteIcon />}
+              onClick={() => router.push('/favorites')}
+              fullWidth
+              sx={{
+                borderRadius: 2,
+                py: 1,
+                textTransform: 'none',
+                fontSize: '0.9rem',
+                borderColor: theme.palette.warning.main,
+                color: theme.palette.warning.main,
+                '&:hover': {
+                  borderColor: theme.palette.warning.dark,
+                  backgroundColor: theme.palette.warning.light + '20',
+                }
+              }}
+            >
+              Platos favoritos
+            </Button>
+          </Stack>
+        </Box>
 
         <Box sx={{ 
           maxWidth: 'min(100%, 600px)',

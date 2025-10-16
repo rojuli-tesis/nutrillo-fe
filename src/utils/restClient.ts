@@ -7,6 +7,37 @@ const instance = axios.create({
   withCredentials: true,
 });
 
+// Response interceptor to handle 401 responses
+instance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname;
+        const requestUrl = error.config?.url || '';
+        
+        // Don't redirect if we're already on login page or if it's an auth check request
+        const isOnLoginPage = currentPath.startsWith('/login');
+        const isAuthCheck = requestUrl.includes('/auth/me');
+        
+        if (!isOnLoginPage && !isAuthCheck) {
+          // Clear any stored authentication data
+          document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          
+          // Dispatch a custom event to notify components about the 401
+          window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+          
+          // Redirect to login page
+          window.location.href = '/login';
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 const post = async (url: string, data?: any) => {
   const config = {
     headers: data instanceof FormData
@@ -39,11 +70,17 @@ const patch = async <T>(url: string, data?: any) => {
   return response.data;
 };
 
+const del = async (url: string) => {
+  const response = await instance.delete(url);
+  return response.data;
+};
+
 const restClient = {
   post,
   patch,
   put,
   get,
+  delete: del,
   postWithCredentials,
 };
 

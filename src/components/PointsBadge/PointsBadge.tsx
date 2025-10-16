@@ -1,41 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
-  Box,
   Chip,
   Typography,
-  useTheme,
   Skeleton,
 } from '@mui/material';
-import {
-  Star as StarIcon,
-} from '@mui/icons-material';
-import { pointsService, PointsStatus } from '@/services/pointsService';
+import { useUser } from '@/contexts/UserContext';
+import CoinIcon from '../icons/CoinIcon';
 
 const PointsBadge: React.FC = () => {
-  const theme = useTheme();
-  const [pointsStatus, setPointsStatus] = useState<PointsStatus | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { state } = useUser();
+  const { user, isLoading } = state;
 
-  useEffect(() => {
-    const fetchPointsStatus = async () => {
-      try {
-        setLoading(true);
-        const status = await pointsService.getPointsStatus();
-        setPointsStatus(status);
-      } catch (error) {
-        console.error('Error fetching points status:', error);
-        // Don't show error to user, just don't display points
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPointsStatus();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Skeleton 
         variant="rectangular" 
@@ -46,16 +24,16 @@ const PointsBadge: React.FC = () => {
     );
   }
 
-  if (!pointsStatus) {
+  if (!user || typeof user.points !== 'number') {
     return null;
   }
 
   return (
     <Chip
-      icon={<StarIcon sx={{ color: theme.palette.warning.light }} />}
+      icon={<CoinIcon sx={{ fontSize: 20 }} />}
       label={
         <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-          {pointsStatus.totalPoints.toLocaleString()}
+          {user.points.toLocaleString()}
         </Typography>
       }
       sx={{

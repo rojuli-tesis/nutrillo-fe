@@ -12,18 +12,19 @@ import {
   Alert,
   AlertTitle,
   IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Button,
-  Divider
 } from '@mui/material';
-import { Favorite, FavoriteBorder, Visibility, Star } from '@mui/icons-material';
+import { Favorite, FavoriteBorder, Visibility, Star, Message } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
+import { useSnackbar } from 'notistack';
 import restClient from '@/utils/restClient';
 import GaugeChart from '@/components/GaugeChart';
 import MainLayout from '../components/MainLayout';
+import { PlateEvaluationModal } from '../plate-builder/components/PlateEvaluationModal';
+import { usePlateStore } from '../plate-builder/usePlateStore';
+import { PlateIngredient } from '@/types/plate-ingredient';
+import { useUser } from '@/contexts/UserContext';
+import { Recipe } from '../plate-builder/components/GeneratedRecipesView';
 
 interface SavedEvaluation {
   id: number;
@@ -39,6 +40,7 @@ interface SavedEvaluation {
     suggestions: string;
   };
   userNotes?: string;
+  nutritionistNotes?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -49,22 +51,49 @@ const FavoritesPage: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [selectedEvaluation, setSelectedEvaluation] = useState<SavedEvaluation | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [allIngredients, setAllIngredients] = useState<PlateIngredient[]>([]);
+  const [generatingRecipes, setGeneratingRecipes] = useState(false);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [recipePointsSpent, setRecipePointsSpent] = useState<number>(0);
+  const [recipeRemainingPoints, setRecipeRemainingPoints] = useState<number>(0);
+  const [savedRecipes, setSavedRecipes] = useState<Set<string>>(new Set());
   const router = useRouter();
+  const { setSelectedIngredients } = usePlateStore();
+  const { state: userState, dispatch: userDispatch } = useUser();
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     fetchFavorites();
+    fetchAllIngredients();
   }, []);
 
   const fetchFavorites = async () => {
     try {
       setLoading(true);
       const response = await restClient.get<SavedEvaluation[]>('/plate-evaluator/favorites');
-      setFavorites(response);
+      // Ensure scores are numbers
+      const processedFavorites = response.map(fav => ({
+        ...fav,
+        evaluation: {
+          ...fav.evaluation,
+          score: parseFloat(fav.evaluation.score.toString())
+        }
+      }));
+      setFavorites(processedFavorites);
     } catch (error) {
       console.error('Error fetching favorites:', error);
       setError('Error al cargar tus platos favoritos. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAllIngredients = async () => {
+    try {
+      const response = await restClient.get<PlateIngredient[]>('/plate-ingredient');
+      setAllIngredients(response);
+    } catch (error) {
+      console.error('Error fetching ingredients:', error);
     }
   };
 
@@ -86,6 +115,114 @@ const FavoritesPage: React.FC = () => {
   const handleCloseDetailModal = () => {
     setDetailModalOpen(false);
     setSelectedEvaluation(null);
+  };
+
+  const handleCreateSimilar = () => {
+    if (!selectedEvaluation) return;
+
+    // Find the full ingredient objects from the saved ingredient names
+    const ingredientsToLoad: PlateIngredient[] = [];
+    
+    selectedEvaluation.ingredients.forEach((savedIng) => {
+      const fullIngredient = allIngredients.find(
+        (ing) => ing.name.toLowerCase() === savedIng.name.toLowerCase()
+      );
+      if (fullIngredient) {
+        ingredientsToLoad.push(fullIngredient);
+      }
+    });
+
+    // Set the ingredients in the store
+    setSelectedIngredients(ingredientsToLoad);
+    
+    // Close modal and navigate
+    handleCloseDetailModal();
+    router.push('/plate-builder');
+  };
+
+  const handleGenerateRecipes = async () => {
+    if (!selectedEvaluation) return;
+
+    setGeneratingRecipes(true);
+    try {
+      const payload = {
+        plateEvaluationId: selectedEvaluation.id,
+        ingredients: selectedEvaluation.ingredients.map(ing => ing.name),
+        evaluationScore: parseFloat(selectedEvaluation.evaluation.score.toString()),
+        evaluationIssues: selectedEvaluation.evaluation.issues,
+      };
+      
+      const response = await restClient.post('/recipe-recommendations/generate-from-plate', payload);
+
+      console.log('Recipe recommendations:', response);
+      
+      // Store recipes data
+      setRecipes(response.recipes || []);
+      setRecipePointsSpent(response.pointsSpent || 0);
+      setRecipeRemainingPoints(response.remainingPoints || 0);
+      
+      // Update user points
+      if (userState.user && response.remainingPoints !== undefined) {
+        userDispatch({
+          type: 'SET_USER',
+          payload: { ...userState.user, points: response.remainingPoints },
+        });
+      }
+    } catch (error: any) {
+      console.error('Error generating recipes:', error);
+      if (error.response?.status === 402) {
+        alert('No tienes suficientes puntos para generar recomendaciones de recetas. Necesitas 5 puntos.');
+      } else if (error.response?.status === 400) {
+        alert('Error en los datos del plato. Por favor, intenta de nuevo.');
+      } else {
+        alert('Error al generar recomendaciones de recetas. Por favor, intenta de nuevo.');
+      }
+    } finally {
+      setGeneratingRecipes(false);
+    }
+  };
+
+  const handleSaveRecipe = async (recipe: Recipe) => {
+    // Check if recipe is already saved
+    if (savedRecipes.has(recipe.name)) {
+      enqueueSnackbar('Esta receta ya fue guardada', { variant: 'info' });
+      return;
+    }
+
+    try {
+      await restClient.post('/recipes', {
+        name: recipe.name,
+        description: recipe.description,
+        ingredients: recipe.ingredients,
+        instructions: recipe.instructions,
+        cookingTime: recipe.cookingTime,
+        difficulty: recipe.difficulty,
+        nutritionalBenefits: recipe.nutritionalBenefits,
+      });
+      
+      // Add to saved recipes set
+      setSavedRecipes(prev => new Set(Array.from(prev).concat(recipe.name)));
+      
+      // Show success snackbar
+      enqueueSnackbar(`¡Receta "${recipe.name}" guardada exitosamente! Podés verla en "Mis Recetas".`, { 
+        variant: 'success',
+        autoHideDuration: 4000 
+      });
+
+      // Remove from saved set after 3 seconds to allow saving again if needed
+      setTimeout(() => {
+        setSavedRecipes(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(recipe.name);
+          return newSet;
+        });
+      }, 3000);
+    } catch (error: any) {
+      console.error('Error saving recipe:', error);
+      enqueueSnackbar('Error al guardar la receta. Por favor intenta nuevamente.', { 
+        variant: 'error' 
+      });
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -205,10 +342,22 @@ const FavoritesPage: React.FC = () => {
                     </Box>
                   )}
 
-                  {/* Date */}
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 'auto', pt: 1 }}>
-                    Guardado: {formatDate(favorite.createdAt)}
-                  </Typography>
+                  {/* Date and Notes Indicator */}
+                  <Box sx={{ mt: 'auto', pt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Guardado: {formatDate(favorite.createdAt)}
+                    </Typography>
+                    {favorite.nutritionistNotes && (
+                      <Chip
+                        icon={<Message />}
+                        label="Comentarios"
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                        sx={{ fontSize: '0.7rem', height: 20 }}
+                      />
+                    )}
+                  </Box>
 
                   {/* Actions */}
                   <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
@@ -237,163 +386,29 @@ const FavoritesPage: React.FC = () => {
         </Grid>
       )}
 
-      {/* Detail Modal */}
-      <Dialog
+      {/* Detail Modal - Using Unified Component */}
+      <PlateEvaluationModal
         open={detailModalOpen}
+        score={selectedEvaluation?.evaluation.score}
+        ingredients={selectedEvaluation?.ingredients.map(i => i.name)}
+        positives={selectedEvaluation?.evaluation.positives}
+        improvements={selectedEvaluation?.evaluation.issues}
+        suggestions={selectedEvaluation?.evaluation.suggestions}
+        nutritionistNotes={selectedEvaluation?.nutritionistNotes}
+        savedAt={selectedEvaluation ? new Date(selectedEvaluation.createdAt) : undefined}
+        plateEvaluationId={selectedEvaluation?.id}
+        userPoints={userState.user?.points || 0}
+        recipeCost={5}
+        recipes={recipes}
+        recipePointsSpent={recipePointsSpent}
+        recipeRemainingPoints={recipeRemainingPoints}
+        generatingRecipes={generatingRecipes}
+        savedRecipes={savedRecipes}
         onClose={handleCloseDetailModal}
-        maxWidth="md"
-        fullWidth
-        PaperProps={{
-          sx: { borderRadius: 3 }
-        }}
-      >
-        {selectedEvaluation && (
-          <>
-            <DialogTitle sx={{ 
-              pb: 1, 
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 2
-            }}>
-              <Typography variant="h5" component="span">
-                Detalles del Plato
-              </Typography>
-            </DialogTitle>
-            
-            <DialogContent sx={{ pt: 3 }}>
-              <Box sx={{ 
-                backgroundColor: 'grey.50', 
-                p: 3, 
-                borderRadius: 2,
-                border: '1px solid',
-                borderColor: 'divider'
-              }}>
-                {/* Score */}
-                <Box sx={{ textAlign: 'center', mb: 3 }}>
-                  <GaugeChart value={selectedEvaluation.evaluation.score} />
-                </Box>
-
-                {/* Ingredients */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    🥘 Ingredientes:
-                  </Typography>
-                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                    {selectedEvaluation.ingredients.map((ingredient, index) => (
-                      <Chip 
-                        key={index} 
-                        label={ingredient.name} 
-                        color="primary" 
-                        variant="outlined" 
-                        size="small"
-                      />
-                    ))}
-                  </Stack>
-                </Box>
-
-                <Divider sx={{ my: 2 }} />
-
-                {/* Positives */}
-                {selectedEvaluation.evaluation.positives.length > 0 && (
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="h6" color="success.main" gutterBottom>
-                      ✅ Aspectos Positivos
-                    </Typography>
-                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                      {selectedEvaluation.evaluation.positives.map((positive, index) => (
-                        <Chip 
-                          key={index} 
-                          label={positive} 
-                          color="success" 
-                          variant="outlined" 
-                          size="small"
-                        />
-                      ))}
-                    </Stack>
-                  </Box>
-                )}
-
-                {/* Issues */}
-                {selectedEvaluation.evaluation.issues.length > 0 && (
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="h6" color="warning.main" gutterBottom>
-                      ⚠️ Aspectos a Mejorar
-                    </Typography>
-                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                      {selectedEvaluation.evaluation.issues.map((issue, index) => (
-                        <Chip 
-                          key={index} 
-                          label={issue} 
-                          color="warning" 
-                          variant="outlined" 
-                          size="small"
-                        />
-                      ))}
-                    </Stack>
-                  </Box>
-                )}
-
-                {/* Suggestions */}
-                {selectedEvaluation.evaluation.suggestions && (
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="h6" color="info.main" gutterBottom>
-                      💡 Sugerencias
-                    </Typography>
-                    <Typography variant="body1" sx={{ lineHeight: 1.6 }}>
-                      {selectedEvaluation.evaluation.suggestions}
-                    </Typography>
-                  </Box>
-                )}
-
-                {/* User Notes */}
-                {selectedEvaluation.userNotes && (
-                  <Box>
-                    <Typography variant="h6" color="secondary.main" gutterBottom>
-                      📝 Mis Notas
-                    </Typography>
-                    <Typography variant="body1" sx={{ lineHeight: 1.6 }}>
-                      {selectedEvaluation.userNotes}
-                    </Typography>
-                  </Box>
-                )}
-
-                {/* Date */}
-                <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Guardado: {formatDate(selectedEvaluation.createdAt)}
-                  </Typography>
-                </Box>
-              </Box>
-            </DialogContent>
-            
-            <DialogActions sx={{ 
-              px: 3, 
-              py: 2, 
-              borderTop: '1px solid',
-              borderColor: 'divider'
-            }}>
-              <Button 
-                onClick={handleCloseDetailModal}
-                variant="outlined"
-              >
-                Cerrar
-              </Button>
-              <Button 
-                onClick={() => {
-                  handleCloseDetailModal();
-                  router.push('/plate-builder');
-                }}
-                variant="contained"
-                startIcon={<span>🍽️</span>}
-              >
-                Crear Plato Similar
-              </Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
+        onCreateSimilar={handleCreateSimilar}
+        onGenerateRecipes={handleGenerateRecipes}
+        onSaveRecipe={handleSaveRecipe}
+      />
     </Box>
     </MainLayout>
 

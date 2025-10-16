@@ -1,10 +1,8 @@
-import { Metadata } from 'next';
+import { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
   title: 'Nutrillo - Food Log',
   description: 'Track your meals and nutrition journey',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
-  themeColor: '#319795',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -14,6 +12,14 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#319795',
 };
 
 export default function HomeLayout({
