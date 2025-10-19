@@ -16,6 +16,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
 import HistoryIcon from '@mui/icons-material/History';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import DescriptionIcon from '@mui/icons-material/Description';
 import { useRouter } from 'next/navigation';
 import MainLayout from '../components/MainLayout';
 import { getTimeBasedGreeting } from './helpers';
@@ -23,7 +24,7 @@ import { useUser, UserProvider } from '@/contexts/UserContext';
 import { QuickAccessCard } from '../components/QuickAccessCard';
 import WeeklyActivity from '@/components/WeeklyActivity';
 import PointsHistory from '@/components/PointsHistory';
-import { pointsService, PointsStatus, PointTransaction } from '@/services/pointsService';
+import { pointsService,  PointTransaction } from '@/services/pointsService';
 
 const QUICK_ACCESS_ITEMS = [
   {
@@ -33,6 +34,13 @@ const QUICK_ACCESS_ITEMS = [
     path: '/plate-builder',
     color: 'success'
   },
+    {
+    title: 'Registrar comida',
+    description: 'Registra tus comidas diarias',
+    icon: <RestaurantIcon />,
+    path: '/meal-log',
+    color: 'primary'
+  },
   {
     title: 'Recetas favoritas',
     description: 'Ver tus recetas guardadas',
@@ -41,11 +49,11 @@ const QUICK_ACCESS_ITEMS = [
     color: 'secondary'
   },
   {
-    title: 'Registrar comida',
-    description: 'Registra tus comidas diarias',
-    icon: <RestaurantIcon />,
-    path: '/meal-log',
-    color: 'primary'
+    title: 'Mis Planes',
+    description: 'Ver tus planes nutricionales',
+    icon: <DescriptionIcon />,
+    path: '/plans',
+    color: 'warning'
   },
   {
     title: 'Historial de comidas',

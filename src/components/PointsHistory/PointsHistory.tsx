@@ -20,6 +20,7 @@ import {
   TrendingUp as TrendingUpIcon,
 } from '@mui/icons-material';
 import { PointTransaction } from '@/services/pointsService';
+import { translateActivityDescription } from '@/utils/activityTranslations';
 
 interface PointsHistoryProps {
   transactions: PointTransaction[];
@@ -122,10 +123,10 @@ const PointsHistory: React.FC<PointsHistoryProps> = ({ transactions, loading = f
                 primary={
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {transaction.description}
+                      {translateActivityDescription(transaction.description)}
                     </Typography>
                     <Chip
-                      label={`+${transaction.pointsEarned}`}
+                      label={transaction.pointsEarned > 0 ? `+${transaction.pointsEarned}` : `${transaction.pointsEarned}`}
                       size="small"
                       color={getActivityColor(transaction.activityType) as any}
                       sx={{ fontWeight: 'bold' }}

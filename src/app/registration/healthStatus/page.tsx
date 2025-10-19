@@ -1,18 +1,24 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Grid,
   InputLabel,
   MenuItem,
   Select,
   FormControl,
+  Box,
+  CircularProgress,
 } from "@mui/material";
 import { HealthStatus as HealthStatusInterface } from "@/utils/constants/registration";
 import { Controller, useForm } from "react-hook-form";
 import RegistrationStep from "@/app/components/registration/RegistrationStep";
+import { useRegistrationData } from "@/hooks/useRegistrationData";
 
 const HealthStatus = () => {
+  const { getStepData, isLoading } = useRegistrationData();
+  const existingData = getStepData("healthStatus");
+
   const form = useForm<HealthStatusInterface>({
     defaultValues: {
       diagnosedIllness: 0,
@@ -21,6 +27,26 @@ const HealthStatus = () => {
       stepName: "healthStatus"
     },
   });
+
+  // Update form values when existing data is loaded
+  useEffect(() => {
+    if (existingData) {
+      form.reset({
+        diagnosedIllness: existingData.diagnosedIllness || 0,
+        medication: existingData.medication || 0,
+        weightLossMeds: existingData.weightLossMeds || 0,
+        stepName: "healthStatus"
+      });
+    }
+  }, [existingData, form]);
+
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <RegistrationStep

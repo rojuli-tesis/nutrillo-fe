@@ -1,0 +1,43 @@
+/* DatePicker Spanish localization and theme styling */
+.MuiPickersDay-root.Mui-selected {
+  background-color: #45BBA4 !important;
+  color: #fff !important;
+}
+
+.MuiPickersDay-root.Mui-selected:hover {
+  background-color: #3aa894 !important;
+}
+
+.MuiPickersDay-root.MuiPickersDay-today {
+  border: 1px solid #45BBA4 !important;
+  color: #45BBA4 !important;
+}
+
+.MuiPickersDay-root.MuiPickersDay-today.Mui-selected {
+  background-color: #45BBA4 !important;
+  color: #fff !important;
+}
+
+/* Month and year navigation buttons */
+.MuiPickersArrowSwitcher-button {
+  color: #45BBA4 !important;
+}
+
+.MuiPickersArrowSwitcher-button:hover {
+  background-color: rgba(69, 187, 164, 0.1) !important;
+}
+
+/* Calendar header */
+.MuiPickersCalendarHeader-label {
+  color: #45BBA4 !important;
+  font-weight: 600 !important;
+}
+
+/* Action buttons (Clear, Today) */
+.MuiPickersActionBar-action {
+  color: #45BBA4 !important;
+}
+
+.MuiPickersActionBar-action:hover {
+  background-color: rgba(69, 187, 164, 0.1) !important;
+}

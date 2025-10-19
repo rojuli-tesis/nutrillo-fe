@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Grid, Slider, Button } from "@mui/material";
+import { Grid, Button, Box, CircularProgress } from "@mui/material";
 import { ExtraDetails, Workout } from "@/utils/constants/registration";
 import { Controller, useForm } from "react-hook-form";
 import RegistrationStep from "@/app/components/registration/RegistrationStep";
 import WorkoutForm from "@/app/registration/exercise/components/WorkoutForm";
+import ActivityLevelField from "@/components/form/ActivityLevelField";
+import { useRegistrationData } from "@/hooks/useRegistrationData";
 
 const emptyWorkout = {
   name: "",
@@ -16,24 +18,45 @@ const emptyWorkout = {
 };
 
 const Exercise = () => {
+  const { getStepData, isLoading } = useRegistrationData();
+  const existingData = getStepData("exercise");
+
   const [workouts, setWorkouts] = useState<Array<Workout & { id: number }>>([
     { ...emptyWorkout, id: Math.random() },
   ]);
 
   const form = useForm<ExtraDetails>({
     defaultValues: {
-      sedentaryLevel: 0,
+      sedentaryLevel: '',
       workouts: [],
       stepName: "exercise"
     },
   });
 
-  const { setValue } = form;
+  const { setValue, reset } = form;
 
   useEffect(() => {
     // Update form value whenever workouts change
     setValue("workouts", workouts);
   }, [workouts, setValue]);
+
+  // Update form values when existing data is loaded
+  useEffect(() => {
+    if (existingData) {
+      const existingWorkouts = existingData.workouts || [];
+      const workoutsWithIds = existingWorkouts.length > 0 
+        ? existingWorkouts.map((workout: Workout, index: number) => ({ ...workout, id: Math.random() }))
+        : [{ ...emptyWorkout, id: Math.random() }];
+      
+      setWorkouts(workoutsWithIds);
+      
+      reset({
+        sedentaryLevel: existingData.sedentaryLevel || '',
+        workouts: existingWorkouts,
+        stepName: "exercise"
+      });
+    }
+  }, [existingData, reset]);
 
   const addWorkout = () => {
     setWorkouts([...workouts, { ...emptyWorkout, id: Math.random() }]);
@@ -57,6 +80,14 @@ const Exercise = () => {
       });
     };
 
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <RegistrationStep
       stepName="exercise"
@@ -65,29 +96,17 @@ const Exercise = () => {
       form={form}
     >
       <Grid container spacing={2}>
-        <Grid
-          item
-          xs={12}
-          sx={{
-            p: "10px 50px",
-          }}
-        >
+        <Grid item xs={12}>
           <Controller
             name="sedentaryLevel"
             control={form.control}
             render={({ field }) => (
-              <Slider
-                step={null}
-                min={0}
-                max={3}
-                marks={[
-                  { value: 0, label: "Sedentario" },
-                  { value: 1, label: "1-3 días/semana" },
-                  { value: 2, label: "3-5 días/semana" },
-                  { value: 3, label: "Alta intensidad" },
-                ]}
-                value={typeof field.value === "number" ? field.value : 0}
-                onChange={(_, value) => field.onChange(value)}
+              <ActivityLevelField
+                name="sedentaryLevel"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                helperText="Selecciona el nivel que mejor describa tu actividad física actual"
               />
             )}
           />

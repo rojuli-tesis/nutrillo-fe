@@ -44,10 +44,16 @@ export const translateMealType = (mealType: string) => {
   switch (mealType) {
     case 'breakfast':
       return 'Desayuno';
+    case 'morningSnack':
+      return 'Media mañana';
     case 'lunch':
       return 'Almuerzo';
+    case 'afternoonSnack':
+      return 'Merienda';
     case 'dinner':
       return 'Cena';
+    case 'eveningSnack':
+      return 'Colación nocturna';
     case 'snack':
       return 'Merienda';
     default:

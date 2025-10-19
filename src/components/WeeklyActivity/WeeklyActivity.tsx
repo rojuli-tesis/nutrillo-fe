@@ -14,7 +14,8 @@ import {
   CheckCircle as CheckCircleIcon,
   RadioButtonUnchecked as UncheckedIcon,
 } from '@mui/icons-material';
-import { pointsService, PointsStatus } from '@/services/pointsService';
+import { useRouter } from 'next/navigation';
+import { pointsService, PointsStatus, DailyActivity } from '@/services/pointsService';
 import { 
   getWeekDays, 
   isDayActive, 
@@ -29,25 +30,43 @@ interface WeeklyActivityProps {
 
 const WeeklyActivity: React.FC<WeeklyActivityProps> = ({ loading = false }) => {
   const theme = useTheme();
+  const router = useRouter();
   const [pointsStatus, setPointsStatus] = useState<PointsStatus | null>(null);
+  const [dailyActivities, setDailyActivities] = useState<DailyActivity[]>([]);
   const [loadingState, setLoadingState] = useState(true);
 
   useEffect(() => {
-    const fetchPointsStatus = async () => {
+    const fetchData = async () => {
       try {
         setLoadingState(true);
-        const status = await pointsService.getPointsStatus();
+        // Fetch both points status and activity history
+        const [status, activityHistory] = await Promise.all([
+          pointsService.getPointsStatus(),
+          pointsService.getActivityHistory(7) // Get last 7 days of activity
+        ]);
         setPointsStatus(status);
+        setDailyActivities(activityHistory.dailyActivities);
       } catch (error) {
-        console.error('Error fetching points status:', error);
+        console.error('Error fetching activity data:', error);
         // Don't show error to user, just don't display activity
       } finally {
         setLoadingState(false);
       }
     };
 
-    fetchPointsStatus();
+    fetchData();
   }, []);
+
+  const handleDayClick = (day: WeekDay) => {
+    if (day.isToday) {
+      // Navigate to meal log page for current day
+      router.push('/meal-log');
+    } else if (day.isPast) {
+      // Navigate to meal log list page for past days
+      router.push('/meal-log-list');
+    }
+    // Future days are not clickable
+  };
 
 
 
@@ -73,11 +92,11 @@ const WeeklyActivity: React.FC<WeeklyActivityProps> = ({ loading = false }) => {
   }
 
   const weekDays = getWeekDays();
-  const activeDays = getActiveDaysCount(weekDays, pointsStatus);
+  const activeDays = getActiveDaysCount(weekDays, dailyActivities);
 
   return (
     <Card sx={{ borderRadius: 3, mb: 2, boxShadow: 'none', border: 'none' }}>
-      <CardContent sx={{ py: 1, px: 2, '&:last-child': { pb: 1 } }}>
+      <CardContent sx={{ py: 1, px: 0, '&:last-child': { pb: 1 } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.75 }}>
           <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 600, fontSize: '0.95rem' }}>
             Actividad Semanal
@@ -89,27 +108,33 @@ const WeeklyActivity: React.FC<WeeklyActivityProps> = ({ loading = false }) => {
 
         <Grid container spacing={0.5}>
           {weekDays.map((day, index) => {
-            const isActive = isDayActive(day.date, pointsStatus);
+            const isActive = isDayActive(day.date, dailyActivities);
             const isToday = day.isToday;
             
             return (
               <Grid item xs key={index}>
-                                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      p: 0.5,
-                      borderRadius: 1.5,
-                      bgcolor: isToday 
-                        ? theme.palette.primary.main 
-                        : isActive 
-                          ? theme.palette.success.light
-                          : 'transparent',
-                      minHeight: 38,
-                      transition: 'all 0.2s ease-in-out',
-                    }}
-                  >
+                <Box
+                  onClick={() => handleDayClick(day)}
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    p: 0.5,
+                    borderRadius: 1.5,
+                    bgcolor: isToday 
+                      ? theme.palette.primary.main 
+                      : isActive 
+                        ? theme.palette.success.light
+                        : 'transparent',
+                    minHeight: 38,
+                    transition: 'all 0.2s ease-in-out',
+                    cursor: (day.isToday || day.isPast) ? 'pointer' : 'default',
+                    '&:hover': (day.isToday || day.isPast) ? {
+                      transform: 'scale(1.05)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    } : {},
+                  }}
+                >
                     <Typography 
                       variant="caption" 
                       color={isToday ? 'white' : isActive ? 'text.primary' : 'text.secondary'}

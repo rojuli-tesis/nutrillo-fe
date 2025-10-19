@@ -26,6 +26,10 @@ const RegistrationStep = <T extends FieldValues & { stepName?: string }>({
   const pathname = usePathname();
   const router = useRouter();
   const { handleSubmit } = form;
+  
+  // Check if this is the last step
+  const currentStepIndex = steps.indexOf(pathname.replace("/registration/", ""));
+  const isLastStep = currentStepIndex === steps.length - 1;
 
   const saveAndClose = async (formData: T) => {
     try {
@@ -65,7 +69,7 @@ const RegistrationStep = <T extends FieldValues & { stepName?: string }>({
 
   return (
     <div>
-      <CenteredBox sx={{ flexDirection: "column" }}>
+      <CenteredBox sx={{ flexDirection: "column" , p: "0 32px"}}>
         <Typography variant="h5" component="h2">
           {title}
         </Typography>
@@ -76,7 +80,7 @@ const RegistrationStep = <T extends FieldValues & { stepName?: string }>({
           padding: "16px 32px",
         }}
       >
-        <form onSubmit={handleSubmit(goToNextStep)}>
+        <form onSubmit={handleSubmit(isLastStep ? saveAndClose : goToNextStep)}>
           {children}
         </form>
       </Box>
@@ -87,20 +91,22 @@ const RegistrationStep = <T extends FieldValues & { stepName?: string }>({
           padding: "16px 32px",
         }}
       >
+        {!isLastStep && (
+          <Grid item xs={12}>
+            <Button
+              fullWidth
+              onClick={handleSubmit(goToNextStep)}
+              variant={"contained"}
+            >
+              Siguiente
+            </Button>
+          </Grid>
+        )}
         <Grid item xs={12}>
           <Button
             fullWidth
-            onClick={handleSubmit(goToNextStep)}
-            variant={"contained"}
-          >
-            Siguiente
-          </Button>
-        </Grid>
-        <Grid item xs={12}>
-          <Button
-            fullWidth
-            variant={"outlined"}
-            color={"secondary"}
+            variant={isLastStep ? "contained" : "outlined"}
+            color={isLastStep ? "primary" : "secondary"}
             onClick={handleSubmit(saveAndClose)}
           >
             Guardar y Finalizar

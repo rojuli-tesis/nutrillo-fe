@@ -1,4 +1,4 @@
-import { PointsStatus } from '@/services/pointsService';
+import {  DailyActivity } from '@/services/pointsService';
 
 export interface WeekDay {
   name: string;
@@ -11,7 +11,7 @@ export interface WeekDay {
  * Get the current week's days (Sunday to Saturday)
  */
 export const getWeekDays = (): WeekDay[] => {
-  const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const days = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
   const today = new Date();
   const weekDays: WeekDay[] = [];
   
@@ -34,32 +34,15 @@ export const getWeekDays = (): WeekDay[] => {
 };
 
 /**
- * Check if a specific date was active based on current streak data
- * Note: This is a simplified approach. In a real app, you'd want to track daily activity
+ * Check if a specific date was active based on actual daily activity data
  */
-export const isDayActive = (date: Date, pointsStatus: PointsStatus | null): boolean => {
-  if (!pointsStatus) return false;
+export const isDayActive = (date: Date, dailyActivities: DailyActivity[]): boolean => {
+  if (!dailyActivities || dailyActivities.length === 0) return false;
   
-  const today = new Date();
+  const dateString = date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
   
-  // Check if this date is in the last 7 days and user has activity
-  const daysDiff = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-  
-  if (daysDiff < 0 || daysDiff >= 7) return false;
-  
-  // For today, check if user has any activity (streaks > 0)
-  if (daysDiff === 0) {
-    return pointsStatus.streaks.mealLogging.currentStreak > 0 || 
-           pointsStatus.streaks.plateBuilder.currentStreak > 0;
-  }
-  
-  // For past days, we can't determine exactly, but we can show based on current streak
-  const mealStreak = pointsStatus.streaks.mealLogging.currentStreak;
-  const plateStreak = pointsStatus.streaks.plateBuilder.currentStreak;
-  
-  // If user has a streak, assume they were active in recent days
-  return (mealStreak > 0 && daysDiff < mealStreak) || 
-         (plateStreak > 0 && daysDiff < plateStreak);
+  // Check if there's a daily activity record for this date
+  return dailyActivities.some(activity => activity.activityDate === dateString);
 };
 
 /**
@@ -75,7 +58,7 @@ export const calculateStreakMultiplier = (streakDays: number): number => {
  * Get encouraging message based on active days count
  */
 export const getEncouragementMessage = (activeDays: number): string => {
-  if (activeDays === 0) return "¡Comienza tu racha hoy!";
+  if (activeDays === 1) return "¡Comienza tu racha hoy!";
   if (activeDays < 7) return "¡Mantene la racha!";
   return "¡Semana perfecta! 🎉";
 };
@@ -83,6 +66,6 @@ export const getEncouragementMessage = (activeDays: number): string => {
 /**
  * Calculate total active days for the week
  */
-export const getActiveDaysCount = (weekDays: WeekDay[], pointsStatus: PointsStatus | null): number => {
-  return weekDays.filter(day => isDayActive(day.date, pointsStatus)).length;
+export const getActiveDaysCount = (weekDays: WeekDay[], dailyActivities: DailyActivity[]): number => {
+  return weekDays.filter(day => isDayActive(day.date, dailyActivities)).length;
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Grid,
   InputLabel,
@@ -8,12 +8,18 @@ import {
   Select,
   TextField,
   FormControl,
+  Box,
+  CircularProgress,
 } from "@mui/material";
 import { RoutineDetails } from "@/utils/constants/registration";
 import { Controller, useForm } from "react-hook-form";
 import RegistrationStep from "@/app/components/registration/RegistrationStep";
+import { useRegistrationData } from "@/hooks/useRegistrationData";
 
 const RoutineFour = () => {
+  const { getStepData, isLoading } = useRegistrationData();
+  const existingData = getStepData("routine/four");
+
   const form = useForm<RoutineDetails>({
     defaultValues: {
       meriendaTime: 0,
@@ -24,6 +30,28 @@ const RoutineFour = () => {
       stepName: "routine/four"
     },
   });
+
+  // Update form values when existing data is loaded
+  useEffect(() => {
+    if (existingData) {
+      form.reset({
+        meriendaTime: existingData.meriendaTime || 0,
+        meriendaDetails: existingData.meriendaDetails || "",
+        dinnerTime: existingData.dinnerTime || 0,
+        dinnerDetails: existingData.dinnerDetails || "",
+        sleepTime: existingData.sleepTime || 0,
+        stepName: "routine/four"
+      });
+    }
+  }, [existingData, form]);
+
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <RegistrationStep

@@ -8,7 +8,6 @@ import {
   Container,
   Grid,
   TextField,
-  Typography,
   Alert,
   AlertTitle,
   CircularProgress,
@@ -18,10 +17,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import restClient from "@/utils/restClient";
 import { Snackbar } from "@mui/material";
+import Logo from "@/common/logo";
 
 const schema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: z.string().email("Dirección de correo inválida"),
+  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
 });
 
 type LoginForm = z.infer<typeof schema>;
@@ -40,7 +40,7 @@ function LoginForm() {
   } = useForm<LoginForm>({
     resolver: zodResolver(schema),
     defaultValues: {
-      email: "julietarey.lp+juanperez1@gmail.com",
+      email: "julietarey.lp+juanperez2@gmail.com",
       password: "Contrasenia1!",
     },
   });
@@ -70,23 +70,32 @@ function LoginForm() {
       sx={{
         minHeight: "100vh",
         bgcolor: "grey.50",
-        py: 4,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         px: 2,
       }}
     >
-      <Container maxWidth="sm">
-        <Grid container direction="column" spacing={4}>
-          <Grid item>
-            <Typography variant="h4" color="primary" align="center" gutterBottom>
-              Welcome Back
-            </Typography>
+      <Container 
+        maxWidth="sm" 
+        sx={{
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Grid container direction="column" spacing={3} sx={{ width: "100%" }}>
+          <Grid item sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+            <Logo />  
           </Grid>
 
           {fromAccountCreation && (
             <Grid item>
               <Alert severity="success">
-                <AlertTitle>Account created successfully!</AlertTitle>
-                Please verify your email before logging in. Check your spam folder if you haven&apos;t received the verification email.
+                <AlertTitle>¡Cuenta creada exitosamente!</AlertTitle>
+                Por favor verifica tu correo electrónico antes de iniciar sesión. Revisa tu carpeta de spam si no has recibido el correo de verificación.
               </Alert>
             </Grid>
           )}
@@ -96,35 +105,46 @@ function LoginForm() {
               component="form"
               onSubmit={handleSubmit(onSubmit)}
               sx={{
-                width: "100%",
                 maxWidth: "400px",
                 mx: "auto",
-                p: 3,
-                borderRadius: 2,
+                p: "32px 12px",
+                borderRadius: 3,
                 bgcolor: "background.paper",
-                boxShadow: 1,
+                boxShadow: 3,
+                border: "1px solid",
+                borderColor: "grey.200",
               }}
             >
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Email"
+                    label="Correo Electrónico"
                     type="email"
                     error={!!errors.email}
                     helperText={errors.email?.message}
                     {...register("email")}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 2,
+                      },
+                    }}
                   />
                 </Grid>
 
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Password"
+                    label="Contraseña"
                     type="password"
                     error={!!errors.password}
                     helperText={errors.password?.message}
                     {...register("password")}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 2,
+                      },
+                    }}
                   />
                 </Grid>
 
@@ -135,9 +155,15 @@ function LoginForm() {
                     fullWidth
                     size="large"
                     disabled={isSubmitting}
-                    sx={{ mt: 2 }}
+                    sx={{ 
+                      mt: 2,
+                      py: 1.5,
+                      borderRadius: 2,
+                      fontSize: "1.1rem",
+                      fontWeight: 600,
+                    }}
                   >
-                    {isSubmitting ? <CircularProgress size={24} /> : "Sign In"}
+                    {isSubmitting ? <CircularProgress size={24} /> : "Iniciar Sesión"}
                   </Button>
                 </Grid>
               </Grid>
@@ -150,7 +176,7 @@ function LoginForm() {
         open={showError}
         autoHideDuration={3000}
         onClose={() => setShowError(false)}
-        message="Invalid email or password"
+        message="Correo electrónico o contraseña inválidos"
       />
     </Box>
   );

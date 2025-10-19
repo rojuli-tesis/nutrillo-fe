@@ -1,13 +1,17 @@
 "use client";
 
-import React from "react";
-import { Grid, Typography } from "@mui/material";
+import React, { useEffect } from "react";
+import { Grid, Typography, Box, CircularProgress } from "@mui/material";
 import { DietDetails } from "@/utils/constants/registration";
 import { useForm } from "react-hook-form";
 import RegistrationStep from "@/app/components/registration/RegistrationStep";
 import MultiselectCheckbox from "@/app/components/forms/MultiselectCheckbox";
+import { useRegistrationData } from "@/hooks/useRegistrationData";
 
 const DietOne = () => {
+  const { getStepData, isLoading } = useRegistrationData();
+  const existingData = getStepData("diet/one");
+
   const form = useForm<Partial<DietDetails>>({
     defaultValues: {
       liquids: [],
@@ -15,6 +19,25 @@ const DietOne = () => {
       stepName: "diet/one"
     },
   });
+
+  // Update form values when existing data is loaded
+  useEffect(() => {
+    if (existingData) {
+      form.reset({
+        liquids: existingData.liquids || [],
+        sweets: existingData.sweets || [],
+        stepName: "diet/one"
+      });
+    }
+  }, [existingData, form]);
+
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <RegistrationStep
@@ -36,7 +59,7 @@ const DietOne = () => {
               { value: "tea", label: "Té" },
               { value: "juice", label: "Jugo" },
               { value: "milk", label: "Leche" },
-              { value: "soda", label: "Refrescos" },
+              { value: "soda", label: "Gaseosas" },
             ]}
           />
         </Grid>

@@ -70,7 +70,7 @@ export interface RoutineDetails {
 }
 
 export interface ExtraDetails {
-  sedentaryLevel: number;
+  sedentaryLevel: 'sedentary' | 'light' | 'moderate' | 'high' | '';
   workouts: {
     name: string;
     frequency: string;

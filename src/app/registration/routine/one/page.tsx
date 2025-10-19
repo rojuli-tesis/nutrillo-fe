@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Grid,
   InputLabel,
@@ -9,12 +9,18 @@ import {
   TextField,
   Typography,
   FormControl,
+  Box,
+  CircularProgress,
 } from "@mui/material";
 import { RoutineDetails } from "@/utils/constants/registration";
 import { Controller, useForm } from "react-hook-form";
 import RegistrationStep from "@/app/components/registration/RegistrationStep";
+import { useRegistrationData } from "@/hooks/useRegistrationData";
 
 const RoutineOne = () => {
+  const { getStepData, isLoading } = useRegistrationData();
+  const existingData = getStepData("routine/one");
+
   const form = useForm<RoutineDetails>({
     defaultValues: {
       mealsADay: 0,
@@ -25,6 +31,28 @@ const RoutineOne = () => {
       stepName: "routine/one"
     },
   });
+
+  // Update form values when existing data is loaded
+  useEffect(() => {
+    if (existingData) {
+      form.reset({
+        mealsADay: existingData.mealsADay || 0,
+        householdShopper: existingData.householdShopper || 0,
+        starvingHours: existingData.starvingHours || 0,
+        preferredFoods: existingData.preferredFoods || "",
+        dislikedFoods: existingData.dislikedFoods || "",
+        stepName: "routine/one"
+      });
+    }
+  }, [existingData, form]);
+
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <RegistrationStep
@@ -75,7 +103,7 @@ const RoutineOne = () => {
                   {...field}
                 >
                   <MenuItem disabled value={0}>Selecciona una opción</MenuItem>
-                  <MenuItem value={1}>Consultante</MenuItem>
+                  <MenuItem value={1}>Yo mismo/a</MenuItem>
                   <MenuItem value={2}>Pareja</MenuItem>
                   <MenuItem value={3}>Familia</MenuItem>
                   <MenuItem value={4}>Otro</MenuItem>

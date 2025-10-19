@@ -20,6 +20,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import StarIcon from '@mui/icons-material/Star';
 import HistoryIcon from '@mui/icons-material/History';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
+import DescriptionIcon from '@mui/icons-material/Description';
 import { useRouter } from 'next/navigation';
 import PointsBadge from '@/components/PointsBadge';
 
@@ -32,8 +33,7 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    // TODO: Implement logout logic
-    router.push('/login');
+    router.push('/logout');
   };
 
   const handleProfile = () => {
@@ -54,6 +54,10 @@ const Navbar = () => {
 
   const handleMyRecipes = () => {
     router.push('/my-recipes');
+  };
+
+  const handlePlans = () => {
+    router.push('/plans');
   };
 
   return (
@@ -128,6 +132,12 @@ const Navbar = () => {
                 <RestaurantMenuIcon />
               </ListItemIcon>
               <ListItemText primary="Mis Recetas" />
+            </ListItemButton>
+            <ListItemButton onClick={handlePlans}>
+              <ListItemIcon>
+                <DescriptionIcon />
+              </ListItemIcon>
+              <ListItemText primary="Mis Planes" />
             </ListItemButton>
             <ListItemButton onClick={handleActivityHistory}>
               <ListItemIcon>

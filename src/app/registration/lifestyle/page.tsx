@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Grid,
   InputLabel,
@@ -8,12 +8,18 @@ import {
   Select,
   TextField,
   FormControl,
+  Box,
+  CircularProgress,
 } from "@mui/material";
 import { ExtraDetails } from "@/utils/constants/registration";
 import { Controller, useForm } from "react-hook-form";
 import RegistrationStep from "@/app/components/registration/RegistrationStep";
+import { useRegistrationData } from "@/hooks/useRegistrationData";
 
 const Lifestyle = () => {
+  const { getStepData, isLoading } = useRegistrationData();
+  const existingData = getStepData("lifestyle");
+
   const form = useForm<ExtraDetails>({
     defaultValues: {
       alcohol: 0,
@@ -22,11 +28,36 @@ const Lifestyle = () => {
       smokingDetails: "",
       supplements: 0,
       supplementsDetails: "",
-      sedentaryLevel: 0,
+      sedentaryLevel: '',
       workouts: [],
       stepName: "lifestyle"
     },
   });
+
+  // Update form values when existing data is loaded
+  useEffect(() => {
+    if (existingData) {
+      form.reset({
+        alcohol: existingData.alcohol || 0,
+        alcoholDetails: existingData.alcoholDetails || "",
+        smoking: existingData.smoking || 0,
+        smokingDetails: existingData.smokingDetails || "",
+        supplements: existingData.supplements || 0,
+        supplementsDetails: existingData.supplementsDetails || "",
+        sedentaryLevel: existingData.sedentaryLevel || '',
+        workouts: existingData.workouts || [],
+        stepName: "lifestyle"
+      });
+    }
+  }, [existingData, form]);
+
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <RegistrationStep

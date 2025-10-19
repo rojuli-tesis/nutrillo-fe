@@ -12,10 +12,10 @@ const CenteredBox = ({
     <Box
       {...props}
       sx={{
-        width: "100%",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        p: "0 32px",
         ...props.sx,
       }}
     >

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Checkbox,
@@ -33,6 +33,13 @@ const MultiselectCheckbox = (props: MultiselectCheckboxProps) => {
     name: props.name,
     control,
   });
+
+  // Sync local state with form field value
+  useEffect(() => {
+    if (field.value && Array.isArray(field.value)) {
+      setSelectedValues(field.value);
+    }
+  }, [field.value]);
 
   const handleCheckboxClick = (value: string) => () => {
     let newSelection;

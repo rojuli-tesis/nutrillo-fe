@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   Button,
+  CircularProgress,
   Divider,
   Grid,
   InputLabel,
@@ -18,19 +19,38 @@ import CenteredBox from "@/app/components/positioning/CenteredBox";
 import { Controller, useForm } from "react-hook-form";
 import { FormControl } from "@mui/material";
 import restClient from "@/utils/restClient";
+import { useRegistrationData } from "@/hooks/useRegistrationData";
 
 const StepName = "currentStatus";
 
 const CurrentStatus = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const { getStepData, isLoading } = useRegistrationData();
+  const existingData = getStepData("currentStatus");
 
-  const { register, handleSubmit, control } = useForm<PhysicalActivity>({
+  const { register, handleSubmit, control, reset } = useForm<PhysicalActivity>({
     defaultValues: {
       activityLevel: "",
+      height: 0,
+      weight: 0,
       dietType: "",
+      stepName: "currentStatus",
     },
   });
+
+  // Update form values when existing data is loaded
+  useEffect(() => {
+    if (existingData) {
+      reset({
+        activityLevel: existingData.activityLevel || "",
+        height: existingData.height || 0,
+        weight: existingData.weight || 0,
+        dietType: existingData.dietType || "",
+        stepName: "currentStatus",
+      });
+    }
+  }, [existingData, reset]);
 
   const handleAbandon = async () => {
     await restClient.patch("/registration/abandon");
@@ -67,6 +87,14 @@ const CurrentStatus = () => {
       console.error(e);
     }
   };
+
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <div>
@@ -107,7 +135,7 @@ const CurrentStatus = () => {
               <Divider />
             </Grid>
             <Grid item xs={12}>
-              <FormControl>
+              <FormControl fullWidth>
                 <InputLabel id="dietType">Tipo de dieta</InputLabel>
                 <Controller
                   control={control}
@@ -115,13 +143,10 @@ const CurrentStatus = () => {
                     return (
                       <Select
                         labelId={"dietType"}
+                        label="Tipo de dieta"
                         fullWidth
-                        displayEmpty
                         {...field}
                       >
-                        <MenuItem disabled value="">
-                          Selecciona una opcion
-                        </MenuItem>
                         <MenuItem value="vegetarian">Vegetarianismo</MenuItem>
                         <MenuItem value="vegan">Veganismo</MenuItem>
                         <MenuItem value="celiac">Celiaquia</MenuItem>
@@ -135,7 +160,7 @@ const CurrentStatus = () => {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <FormControl>
+              <FormControl fullWidth>
                 <InputLabel id="activityLevel">
                   Nivel de actividad fisica
                 </InputLabel>
@@ -145,13 +170,10 @@ const CurrentStatus = () => {
                     return (
                       <Select
                         labelId={"activityLevel"}
+                        label="Nivel de actividad fisica"
                         fullWidth
-                        displayEmpty
                         {...field}
                       >
-                        <MenuItem disabled value="">
-                          Selecciona una opcion
-                        </MenuItem>
                         <MenuItem value="high">Alta intensidad</MenuItem>
                         <MenuItem value="mid">Media intensidad</MenuItem>
                         <MenuItem value="low">Baja intensidad</MenuItem>
