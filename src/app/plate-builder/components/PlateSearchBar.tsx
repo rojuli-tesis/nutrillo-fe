@@ -76,7 +76,6 @@ export const PlateSearchBar: React.FC<PlateSearchBarProps> = ({
     <Box
       sx={{
         py: 1.5,
-        mb: 2,
       }}
     >
       <Stack spacing={1.5}>

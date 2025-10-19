@@ -7,8 +7,8 @@ import { describeArc, polarToCartesian } from '@/utils/plateUtils';
 
 // Styled components
 const PlateContainer = styled(Box)(({ theme }) => ({
-  width: '320px',
-  height: '320px',
+  width: 'min(320px, 25vh)',
+  height: 'min(320px, 25vh)',
   margin: '20px auto',
   display: 'flex',
   alignItems: 'center',
@@ -52,8 +52,9 @@ const PlateVisualization: React.FC<PlateVisualizationProps> = ({
   return (
     <PlateContainer ref={setNodeRef}>
       <svg 
-        width={300} 
-        height={300} 
+        width="100%" 
+        height="100%" 
+        viewBox="0 0 300 300"
         style={{ 
           borderRadius: '50%', 
           background: isOver ? '#e3f2fd' : '#f5f5f5', 

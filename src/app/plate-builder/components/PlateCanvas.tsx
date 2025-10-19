@@ -5,14 +5,11 @@ import {
   Box,
   Paper,
   Chip,
-  Typography,
   styled,
   useTheme,
   useMediaQuery,
-  IconButton,
 } from '@mui/material';
 import { useDroppable, useDndMonitor, DragOverEvent } from '@dnd-kit/core';
-import CloseIcon from '@mui/icons-material/Close';
 import { PlateIngredient } from '@/types/plate-ingredient';
 import { describeArc, polarToCartesian } from '@/utils/plateUtils';
 
@@ -29,13 +26,13 @@ const PlateContainer = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   gap: theme.spacing(2),
-  padding: theme.spacing(2, 0),
+  padding: '0 0 10px 0',
 }));
 
 const Plate = styled(Paper)(({ theme }) => ({
   borderRadius: '50%',
   aspectRatio: '1 / 1',
-  width: 'min(64vw, 360px)',
+  width: 'min(64vw, 25vh, 360px)',
   maxWidth: 360,
   display: 'flex',
   alignItems: 'center',
@@ -52,7 +49,7 @@ const Plate = styled(Paper)(({ theme }) => ({
   },
   
   [theme.breakpoints.up('md')]: {
-    width: 'min(42vw, 480px)',
+    width: 'min(42vw, 25vh, 480px)',
     maxWidth: 480,
   },
 }));
@@ -84,7 +81,7 @@ export const PlateCanvas: React.FC<PlateCanvasProps> = ({
   const N = items.length;
   const isReady = N >= minCount;
 
-  // SVG dimensions
+  // SVG dimensions - responsive to plate size
   const svgSize = isMobile ? 280 : 360;
   const cx = svgSize / 2;
   const cy = svgSize / 2;
@@ -119,8 +116,9 @@ export const PlateCanvas: React.FC<PlateCanvasProps> = ({
         aria-label={`Plato con ${N} ingredientes`}
       >
         <svg
-          width={svgSize}
-          height={svgSize}
+          width="100%"
+          height="100%"
+          viewBox={`0 0 ${svgSize} ${svgSize}`}
           style={{
             borderRadius: '50%',
           }}
