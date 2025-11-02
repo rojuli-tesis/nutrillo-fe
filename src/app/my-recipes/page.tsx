@@ -330,7 +330,7 @@ export default function MyRecipesPage() {
           <DialogTitle>¿Eliminar receta?</DialogTitle>
           <DialogContent>
             <Typography variant="body2" color="text.secondary">
-              ¿Querés eliminar "{recipeToDelete?.name}" de tus favoritos? Esta acción no se puede deshacer.
+              ¿Querés eliminar &quot;{recipeToDelete?.name}&quot; de tus favoritos? Esta acción no se puede deshacer.
             </Typography>
           </DialogContent>
           <DialogActions sx={{ p: 2.5 }}>

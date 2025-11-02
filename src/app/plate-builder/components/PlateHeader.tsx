@@ -120,7 +120,7 @@ export const PlateHeader: React.FC = () => {
               </li>
               <li>
                 <Typography variant="body2">
-                  Una vez que tengas 3 o más ingredientes, presiona "Evaluar Plato"
+                  Una vez que tengas 3 o más ingredientes, presiona &quot;Evaluar Plato&quot;
                 </Typography>
               </li>
             </Box>

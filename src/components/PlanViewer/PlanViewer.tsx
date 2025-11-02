@@ -9,7 +9,6 @@ import {
   Typography,
   Alert,
   AlertTitle,
-  AlertDescription,
   IconButton,
   Chip,
   Divider,
@@ -139,10 +138,10 @@ const PlanViewer: React.FC<PlanViewerProps> = ({
 
         <Alert severity="info" sx={{ mt: 3 }}>
           <AlertTitle>Vista previa del plan</AlertTitle>
-          <AlertDescription>
-            Para ver el contenido completo del plan, descárgalo haciendo clic en el botón "Descargar".
+          <Typography variant="body2" component="div">
+            Para ver el contenido completo del plan, descárgalo haciendo clic en el botón &quot;Descargar&quot;.
             El archivo PDF contiene todas las recomendaciones nutricionales personalizadas para ti.
-          </AlertDescription>
+          </Typography>
         </Alert>
       </DialogContent>
       

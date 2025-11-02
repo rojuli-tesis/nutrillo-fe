@@ -355,7 +355,7 @@ const PlansPage = () => {
                 <Alert severity="info" sx={{ mt: 2 }}>
                   <AlertTitle>Vista previa del plan</AlertTitle>
                   <Typography variant="body2">
-                    Para ver el contenido completo del plan, descárgalo haciendo clic en el botón "Descargar".
+                    Para ver el contenido completo del plan, descárgalo haciendo clic en el botón &quot;Descargar&quot;.
                   </Typography>
                 </Alert>
               </Box>
@@ -390,7 +390,7 @@ const PlansPage = () => {
           </DialogTitle>
           <DialogContent>
             <Typography>
-              ¿Estás seguro de que quieres descargar "{selectedPlan?.fileName}"?
+              ¿Estás seguro de que quieres descargar &quot;{selectedPlan?.fileName}&quot;?
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
               El archivo se descargará a tu dispositivo.
