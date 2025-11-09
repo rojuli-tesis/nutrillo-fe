@@ -27,3 +27,9 @@ RUN if [ "$NODE_ENV" = "production" ]; then npm run build; fi
 
 # Expose the port that the app runs on
 EXPOSE 3000
+
+# Ensure the Next.js server listens on all interfaces
+ENV HOST=0.0.0.0
+
+# Start the application
+CMD ["npm", "start"]
